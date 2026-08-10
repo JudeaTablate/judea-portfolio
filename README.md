@@ -1,4 +1,4 @@
-Hi, I'm Judea 
+# Hi, I'm Judea 
 ​
 Aspiring AI & ML Engineer · Cloud Engineer
 BS Computer Science with Specialization in Software Engineering — FEU Institute of Technology · Metro Manila, Philippines
