@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Judea Ann C. Tablate — AI Engineer & Automation Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-theme="dark">
+
+<div id="loader">
+  <div class="lg">JUDEA.SYS</div>
+  <div class="pct" id="loadPct">0%</div>
+  <div class="track"><div class="fill" id="loadFill"></div></div>
+</div>
+
+<div id="cursorRing"></div>
+<div id="cursorDot"></div>
+<div id="hudOverlay"></div>
+
+<header>
+  <nav>
+    <div class="logo">JUDEA//</div>
+    <div class="navlinks" id="navLinks">
+      <a href="#work">Work</a>
+      <a href="#skills">Skills</a>
+      <a href="#experience">Experience</a>
+      <a href="#certificates">Certs</a>
+      <a href="#contact">Contact</a>
+    </div>
+    <div class="navtools">
+      <div class="analog-clock">
+        <svg viewBox="0 0 40 40">
+          <circle class="face" cx="20" cy="20" r="18"/>
+          <line id="hourHand" class="hand" x1="20" y1="20" x2="20" y2="11"/>
+          <line id="minHand" class="hand" x1="20" y1="20" x2="20" y2="7"/>
+          <line id="secHand" class="hand sec" x1="20" y1="20" x2="20" y2="6"/>
+          <circle cx="20" cy="20" r="1.4" fill="var(--accent2)"/>
+        </svg>
+      </div>
+      <div id="clock" class="lcd">MNL · GMT+8 · --:--</div>
+      <button class="toolbtn" id="soundBtn">SOUND[off]</button>
+      <button class="toolbtn" id="themeBtn">THEME[dark]</button>
+      <button class="hamburger" id="hamburgerBtn" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
+</header>
+
+<div id="mobileMenu">
+  <a href="#work">Work</a>
+  <a href="#skills">Skills</a>
+  <a href="#experience">Experience</a>
+  <a href="#certificates">Certs</a>
+  <a href="#contact">Contact</a>
+</div>
+
+<section class="hero">
+  <canvas id="warpCanvas"></canvas>
+  <div class="wrap wrap-inner hero-grid">
+    <div>
+      <div class="hero-greeting"><em id="greetingWord">Hi</em>, I'm Judea</div>
+      <div class="eyebrow"><span class="dot"></span>ASPIRING AI & ML ENGINEER · WEB DEVELOPER</div>
+      <h1 id="heroTitle">Systems that<br><span class="grad">run themselves.</span></h1>
+      <p class="hero-sub">I'm Judea — a Computer Science (Software Engineering) student at FEU Institute of Technology, based in Paranaque, Philippines. I turn repetitive manual work into scripts, pipelines, and alerts that quietly keep things running, and bring the same precision to the teams I organize for.</p>
+      <div class="hero-ctas">
+        <a class="btn solid magnetic paint-hover" href="#work">See my work ✦</a>
+        <a class="btn ghost magnetic paint-hover" href="#contact">Say hi →</a>
+      </div>
+    </div>
+    <div class="hero-photo magnetic-card">
+      <canvas id="binaryPhoto"></canvas>
+    </div>
+  </div>
+</section>
+
+<div class="marquee-wrap">
+  <div class="marquee" id="marquee">
+    <span>PYTHON AUTOMATION</span><span>GITHUB ACTIONS</span><span>DOCKER</span><span>CI / CD</span><span>SYSTEM MONITORING</span><span>DATABASE MGMT</span><span>SOP DOCUMENTATION</span><span>GOOGLE WORKSPACE</span><span>NOTION</span><span>TRELLO</span><span>DISCORD API</span>
+    <span>PYTHON AUTOMATION</span><span>GITHUB ACTIONS</span><span>DOCKER</span><span>CI / CD</span><span>SYSTEM MONITORING</span><span>DATABASE MGMT</span><span>SOP DOCUMENTATION</span><span>GOOGLE WORKSPACE</span><span>NOTION</span><span>TRELLO</span><span>DISCORD API</span>
+  </div>
+</div>
+
+<section class="kinetic-sec wrap">
+  <p class="kinetic-text" id="kineticText">I like turning repetitive tasks into scripts, catching problems before they become tickets, and documenting things well enough that someone else could pick up where I left off.</p>
+</section>
+
+<section id="work" class="pad wrap reveal">
+  <div class="sec-head">
+    <div>
+      <div class="sec-num">FEATURED WORK</div>
+      <div class="sec-title">Things I've built</div>
+    </div>
+    <div class="sec-desc">Ordered by how deep the build goes — from full research systems to quick live tools.</div>
+  </div>
+  <div class="work-grid compact">
+    <div class="work-card magnetic-card no-thumb paint-hover">
+      <div class="work-body">
+        <div class="kicker">Thesis Project · Team ByteMe</div>
+        <h3>PsyClick — Clinical Psychomotor Screening</h3>
+        <p>A clinician-guided screening companion pairing PHQ-9/GAD-7 questionnaires with keystroke and mouse-dynamics analysis for exportable decision-support reports. I served as Lead Researcher & Documentation Specialist.</p>
+        <span class="tag">Clinical Decision Support</span><span class="tag">Research</span>
+        <div class="work-links">
+          <a href="https://psyclick-app.vercel.app/" target="_blank" rel="noopener">Live Site ↗</a>
+        </div>
+      </div>
+    </div>
+    <div class="work-card magnetic-card no-thumb paint-hover">
+      <div class="work-body">
+        <div class="kicker">Behavioral Biometrics · Continuous Authentication</div>
+        <h3>Second Sense</h3>
+        <p>A continuous authentication system that learns typing rhythm and mouse movement, then flags a real-time risk score if behavior stops matching after login. Full stack with a frontend, scoring backend, behavioral-baseline database, and automated alerts, packaged with Docker and CI/CD.</p>
+        <span class="tag">Security</span><span class="tag">Full-Stack</span><span class="tag">Docker</span>
+        <div class="work-links">
+          <a href="https://github.com/JudeaTablate/Second-Sense" target="_blank" rel="noopener">View Code ↗</a>
+        </div>
+      </div>
+    </div>
+    <div class="work-card magnetic-card no-thumb paint-hover">
+      <div class="work-body">
+        <div class="kicker">Automation · Monitoring · Discord API</div>
+        <h3>Sentinel — Health & Alerting Automation</h3>
+        <p>A lightweight monitoring layer that replaces manual status checks with automated ones, routing real-time alerts to Discord. Cuts response time on issues before they escalate.</p>
+        <span class="tag">Monitoring</span><span class="tag">DevOps</span>
+        <div class="work-links">
+          <a href="https://github.com/JudeaTablate/sentinel-uptime-monitor" target="_blank" rel="noopener">View Code ↗</a>
+        </div>
+      </div>
+    </div>
+    <div class="work-card magnetic-card no-thumb paint-hover">
+      <div class="work-body">
+        <div class="kicker">Real-Time · No Signup Required</div>
+        <h3>Splitbill.live</h3>
+        <p>A shared bill-splitting tool where totals sync live for everyone as items get added, with no app or account required. Handles tax, tip, and multiple currencies automatically, ready to hand off via Venmo or GCash.</p>
+        <span class="tag">Real-Time Sync</span><span class="tag">Multi-Currency</span>
+        <div class="work-links">
+          <a href="https://splitbill-5ulc.onrender.com" target="_blank" rel="noopener">Live Site ↗</a>
+        </div>
+      </div>
+    </div>
+    <div class="work-card magnetic-card no-thumb paint-hover">
+      <div class="work-body">
+        <div class="kicker">Python · GitHub Actions · Google Drive API</div>
+        <h3>Automated Cloud Backup System</h3>
+        <p>A scheduled Python tool wired into GitHub Actions that syncs files straight to Google Drive, with credentials locked down via GitHub Secrets. Removes the "did I back that up" anxiety entirely.</p>
+        <span class="tag">Automation</span><span class="tag">Cloud</span>
+        <div class="work-links">
+          <a href="https://github.com/JudeaTablate/cloud-auto-backup" target="_blank" rel="noopener">View Code ↗</a>
+        </div>
+      </div>
+    </div>
+    <div class="work-card magnetic-card no-thumb paint-hover">
+      <div class="work-body">
+        <div class="kicker">Next.js · Static Content <span class="unverified">*unconfirmed stack</span></div>
+        <h3>Wine About It</h3>
+        <p>A front-end site that teaches wine basics without the snobbery — varietals, tasting notes, and pairing guidance in plain language. Built with Next.js, deployed on Vercel.</p>
+        <span class="tag">Content Site</span><span class="tag">Next.js</span>
+        <div class="work-links">
+          <a href="https://wine-about-it.vercel.app/" target="_blank" rel="noopener">Live Site ↗</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="skills" class="pad wrap reveal">
+  <div class="sec-head">
+    <div>
+      <div class="sec-num">TECH STACK</div>
+      <div class="sec-title">What I bring to the table</div>
+    </div>
+    <div class="sec-desc">From scripting the boring stuff away to documenting it so it stays fixed.</div>
+  </div>
+
+  <div class="tech-category">
+    <div class="tech-cat-bar"><span class="tech-cat-num">01</span><span class="tech-cat-label">Frontend</span></div>
+    <div class="tech-grid" data-cat="frontend"></div>
+  </div>
+  <div class="tech-category">
+    <div class="tech-cat-bar"><span class="tech-cat-num">02</span><span class="tech-cat-label">Backend</span></div>
+    <div class="tech-grid" data-cat="backend"></div>
+  </div>
+  <div class="tech-category">
+    <div class="tech-cat-bar"><span class="tech-cat-num">03</span><span class="tech-cat-label">DevOps & Cloud</span></div>
+    <div class="tech-grid" data-cat="devops"></div>
+  </div>
+  <div class="tech-category">
+    <div class="tech-cat-bar"><span class="tech-cat-num">04</span><span class="tech-cat-label">AI & Machine Learning</span></div>
+    <div class="tech-grid" data-cat="ai"></div>
+  </div>
+  <div class="tech-category">
+    <div class="tech-cat-bar"><span class="tech-cat-num">05</span><span class="tech-cat-label">CMS & No-Code</span></div>
+    <div class="tech-grid" data-cat="cms"></div>
+  </div>
+  <div class="tech-category">
+    <div class="tech-cat-bar"><span class="tech-cat-num">06</span><span class="tech-cat-label">Developer Tools</span></div>
+    <div class="tech-grid" data-cat="devtools"></div>
+  </div>
+</section>
+
+<section id="experience" class="pad wrap reveal">
+  <div class="sec-head">
+    <div>
+      <div class="sec-num">TRACK RECORD</div>
+      <div class="sec-title">Where I've worked</div>
+    </div>
+    <div class="sec-desc">Logistics, records, and correspondence — proof I can run precise systems for people too.</div>
+  </div>
+
+  <div class="timeline">
+    <div class="timeline-track"><div class="timeline-fill"><div class="timeline-light"></div></div></div>
+    <div class="timeline-rows">
+      <div class="exp-row">
+        <div class="exp-year lcd">2024–now</div>
+        <div><div class="exp-org">FEU Tech Library</div><div class="exp-role">Student Assistant — 100% accuracy on digital records, front-line support for hundreds of daily transactions</div></div>
+        <div class="exp-arrow">↗</div>
+      </div>
+      <div class="exp-row">
+        <div class="exp-year lcd">2024–25</div>
+        <div><div class="exp-org">Student Coordinating Council</div><div class="exp-role">Executive Secretary — council-wide minutes, memos, correspondence, and filing systems</div></div>
+        <div class="exp-arrow">↗</div>
+      </div>
+      <div class="exp-row">
+        <div class="exp-year lcd">2024–25</div>
+        <div><div class="exp-org">Association for Computing Machinery</div><div class="exp-role">Associate Director for Logistics — event logistics, vendor negotiation, contingency planning</div></div>
+        <div class="exp-arrow">↗</div>
+      </div>
+      <div class="exp-row">
+        <div class="exp-year lcd">2023–2024</div>
+        <div><div class="exp-org">Discipline Unit, FEU Institute of Technology</div><div class="exp-role">Student Assistant — logged and tracked student disciplinary records in Excel while providing front-desk administrative support.</div></div>
+        <div class="exp-arrow">↗</div>
+      </div>
+      <div class="exp-row">
+        <div class="exp-year lcd">2023–24</div>
+        <div><div class="exp-org">Junior Philippine Computer Society</div><div class="exp-role">Junior Officer of Logistics — event setup and inventory databases across three student orgs</div></div>
+        <div class="exp-arrow">↗</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="pad wrap reveal">
+  <div class="sec-head">
+    <div>
+      <div class="sec-num">RIGHT NOW</div>
+      <div class="sec-title">Currently</div>
+    </div>
+  </div>
+  <div class="mini-grid">
+    <div class="mini-card magnetic-card paint-hover"><div class="ic">🧠</div><h4>Leveling up applied AI/ML</h4><p>Building toward AI Engineering roles, one project at a time.</p></div>
+    <div class="mini-card magnetic-card paint-hover"><div class="ic">🛠️</div><h4>Shipping automation projects</h4><p>Cloud backups, monitoring, alerting — small tools that remove manual work.</p></div>
+    <div class="mini-card magnetic-card paint-hover"><div class="ic">🎓</div><h4>Finishing my CS degree</h4><p>Software Engineering track at FEU Institute of Technology.</p></div>
+  </div>
+</section>
+
+<section class="pad wrap reveal">
+  <div class="sec-head">
+    <div>
+      <div class="sec-num">EASTER EGG</div>
+      <div class="sec-title">Poke around a bit</div>
+    </div>
+    <div class="sec-desc">This actually runs. Try <span class="lcd" style="color:var(--accent3);">help</span> to see what it can do.</div>
+  </div>
+  <div class="term">
+    <div class="term-bar">
+      <span class="dotr r"></span><span class="dotr y"></span><span class="dotr g"></span>
+      <span class="term-title lcd">judea@portfolio:~</span>
+    </div>
+    <div class="term-body" id="termBody"></div>
+    <div class="term-inputline">
+      <span class="lcd term-prompt">visitor@judea.dev ~ %</span>
+      <input id="termInput" class="lcd" autocomplete="off" spellcheck="false" placeholder="type a command...">
+    </div>
+  </div>
+</section>
+
+<section id="certificates" class="pad wrap reveal">
+  <div class="sec-head">
+    <div>
+      <div class="sec-num">PROOF</div>
+      <div class="sec-title">Certificates</div>
+    </div>
+  </div>
+
+  <div class="cert-categories">
+  <div class="cert-category">
+    <div class="cert-cat-label">AI & Data</div>
+    <div class="cert-row">
+      <div class="cert-card paint-hover">
+        <div class="cert-badge" data-issuer-slug="testdome"></div>
+        <h4>AI Agents</h4>
+        <div class="cert-issuer">TestDome</div>
+        <a href="https://www.testdome.com/certificates/33089f4e2a1f4b64aba6990b403dda9a" target="_blank" rel="noopener" class="cert-link">‹ Verify ›</a>
+      </div>
+      <div class="cert-card paint-hover">
+        <div class="cert-badge" data-issuer-slug="testdome"></div>
+        <h4>Python Machine Learning</h4>
+        <div class="cert-issuer">TestDome</div>
+        <a href="https://www.testdome.com/certificates/ef905e8f4af24cc486a27c18ffb0b9ab" target="_blank" rel="noopener" class="cert-link">‹ Verify ›</a>
+      </div>
+      <div class="cert-card paint-hover">
+        <div class="cert-badge" data-issuer-slug="datacamp"></div>
+        <h4>Working with the OpenAI API</h4>
+        <div class="cert-issuer">DataCamp — In Progress</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cert-category">
+    <div class="cert-cat-label">Engineering</div>
+    <div class="cert-row">
+      <div class="cert-card paint-hover">
+        <div class="cert-badge" data-issuer-slug="pearson"></div>
+        <h4>IT Specialist - Python</h4>
+        <div class="cert-issuer">Pearson</div>
+        <a href="https://www.credly.com/badges/a48848ff-4d1e-4858-a0c7-b6598316ae7b/public_url" target="_blank" rel="noopener" class="cert-link">‹ Verify ›</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="cert-category">
+    <div class="cert-cat-label">Cloud & DevOps</div>
+    <div class="cert-row">
+      <div class="cert-card paint-hover">
+        <div class="cert-badge" data-issuer-slug="datacamp"></div>
+        <h4>Preparing for Your Associate Cloud Engineer Journey</h4>
+        <div class="cert-issuer">DataCamp</div>
+        <a href="https://www.datacamp.com/completed/statement-of-accomplishment/course/923eb1c40462bed79f6d40e32c5c7d6bc6fa5bea" target="_blank" rel="noopener" class="cert-link">‹ Verify ›</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="cert-category">
+    <div class="cert-cat-label">Networking</div>
+    <div class="cert-row">
+      <div class="cert-card paint-hover">
+        <div class="cert-badge" data-issuer-slug="cisco"></div>
+        <h4>Getting Started with Cisco Packet Tracer</h4>
+        <div class="cert-issuer">Cisco Networking Academy</div>
+        <a href="https://drive.google.com/file/d/13j3jPgsRbWsPR66udWN9m1-7aXtH_ijT/view?usp=drive_link" target="_blank" rel="noopener" class="cert-link">‹ Verify ›</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="cert-category">
+    <div class="cert-cat-label">Business & Management</div>
+    <div class="cert-row">
+      <div class="cert-card paint-hover">
+        <div class="cert-badge" data-issuer-slug="ipophl"></div>
+        <h4>Foundation Course on IP and New Product Development</h4>
+        <div class="cert-issuer">IPOPHL</div>
+        <a href="https://drive.google.com/file/d/1btolPv3QK7HTpy14Q_VvV67RZ5YjOLzq/view?usp=drive_link" target="_blank" rel="noopener" class="cert-link">‹ Verify ›</a>
+      </div>
+      <div class="cert-card paint-hover">
+        <div class="cert-badge" data-issuer-slug="pmi"></div>
+        <h4>PMI Project Management Ready</h4>
+        <div class="cert-issuer">PMI</div>
+        <a href="https://www.credly.com/badges/0dedf9b7-93bc-42e9-acc6-50e7f32928fa/public_url" target="_blank" rel="noopener" class="cert-link">‹ Verify ›</a>
+      </div>
+    </div>
+  </div>
+  </div>
+</section>
+
+<section id="contact" class="wrap reveal contact-3d">
+  <canvas id="contactShape"></canvas>
+  <div class="sec-num" style="text-align:center; margin-bottom:14px;">GET IN TOUCH</div>
+  <h2>Got a role in mind?<br>Let's talk.</h2>
+  <a class="em" href="mailto:judeaannctablate@gmail.com">judeaannctablate@gmail.com</a>
+  <div style="margin-top:26px; display:flex; gap:14px; justify-content:center; flex-wrap:wrap;">
+    <a class="btn solid magnetic paint-hover" href="mailto:judeaannctablate@gmail.com">Send an email ✦</a>
+    <a class="btn ghost magnetic paint-hover" href="https://www.linkedin.com/in/judea-ann-tablate-65a8901b7/" target="_blank" rel="noopener">LinkedIn ↗</a>
+    <a class="btn ghost magnetic paint-hover" href="https://github.com/JudeaTablate" target="_blank" rel="noopener">GitHub ↗</a>
+    <a class="btn ghost magnetic paint-hover" href="tel:+639087288413">Call +63 908 728 8413</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap footbar">
+    <div class="foot-brand">JUDEA©2026</div>
+    <div class="foot-links">
+      <a href="mailto:judeaannctablate@gmail.com">Email</a>
+      <a href="https://github.com/JudeaTablate" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://www.linkedin.com/in/judea-ann-tablate-65a8901b7/" target="_blank" rel="noopener">LinkedIn</a>
+      <a href="https://www.instagram.com/ja_tubs" target="_blank" rel="noopener">Instagram</a>
+      <a href="https://web.facebook.com/Judeaann11/" target="_blank" rel="noopener">Facebook</a>
+      <a href="tel:+639087288413">Phone</a>
+    </div>
+  </div>
+</footer>
+
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>
