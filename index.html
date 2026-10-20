@@ -2,8 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Judea Ann C. Tablate — AI Engineer & Automation Builder</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0A0E27">
+<title>Judea Ann C. Tablate — AI/ML & Web Developer</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
@@ -40,8 +42,11 @@
         </svg>
       </div>
       <div id="clock" class="lcd">MNL · GMT+8 · --:--</div>
-      <button class="toolbtn" id="soundBtn">SOUND[off]</button>
-      <button class="toolbtn" id="themeBtn">THEME[dark]</button>
+      <div class="sound-menu" id="soundMenu">
+        <button class="toolbtn" id="soundBtn" aria-haspopup="listbox" aria-expanded="false" aria-label="Choose background music"><span class="ic" data-icon="music"></span><span class="tb-label" id="soundLabel">Sound: Off</span><span class="ic ic-chev" data-icon="chevron"></span></button>
+        <ul class="sound-list" id="soundList" role="listbox" aria-label="Music mood"></ul>
+      </div>
+      <button class="toolbtn" id="themeBtn" aria-label="Switch to light mode"><span class="ic" id="themeIc" data-icon="sun"></span><span class="tb-label" id="themeLabel">Light</span></button>
       <button class="hamburger" id="hamburgerBtn" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mobileMenu"><span></span><span></span><span></span></button>
     </div>
   </nav>
@@ -49,6 +54,7 @@
 
 <div id="mobileMenu">
   <a href="#work">Work</a>
+  <div class="mm-sub" id="mmProjects"></div>
   <a href="#skills">Skills</a>
   <a href="#experience">Experience</a>
   <a href="#certificates">Certs</a>
@@ -64,12 +70,12 @@
       <h1 id="heroTitle">Systems that<br><span class="grad">run themselves.</span></h1>
       <p class="hero-sub">I'm Judea — a Computer Science (Software Engineering) student at FEU Institute of Technology, based in Paranaque, Philippines. I turn repetitive manual work into scripts, pipelines, and alerts that quietly keep things running, and bring the same precision to the teams I organize for.</p>
       <div class="hero-ctas">
-        <a class="btn solid magnetic paint-hover" href="#work">See my work ✦</a>
+        <a class="btn solid magnetic paint-hover" href="#work">See my work <span class="ic-i" data-icon="sparkle"></span></a>
         <a class="btn ghost magnetic paint-hover" href="#contact">Say hi →</a>
       </div>
     </div>
     <div class="hero-photo magnetic-card">
-      <canvas id="binaryPhoto"></canvas>
+      <canvas id="binaryPhoto" role="img" aria-label="Portrait of Judea, switches to a smiling photo on hover"></canvas>
     </div>
   </div>
 </section>
@@ -85,81 +91,20 @@
   <p class="kinetic-text" id="kineticText">I like turning repetitive tasks into scripts, catching problems before they become tickets, and documenting things well enough that someone else could pick up where I left off.</p>
 </section>
 
-<section id="work" class="pad wrap reveal">
-  <div class="sec-head">
-    <div>
-      <div class="sec-num">FEATURED WORK</div>
-      <div class="sec-title">Things I've built</div>
-    </div>
-    <div class="sec-desc">Ordered by how deep the build goes — from full research systems to quick live tools.</div>
-  </div>
-  <div class="work-grid compact">
-    <div class="work-card magnetic-card no-thumb paint-hover">
-      <div class="work-body">
-        <div class="kicker">Thesis Project · Team ByteMe</div>
-        <h3>PsyClick — Clinical Psychomotor Screening</h3>
-        <p>A clinician-guided screening companion pairing PHQ-9/GAD-7 questionnaires with keystroke and mouse-dynamics analysis for exportable decision-support reports. I served as Lead Researcher & Documentation Specialist.</p>
-        <span class="tag">Clinical Decision Support</span><span class="tag">Research</span>
-        <div class="work-links">
-          <a href="https://psyclick-app.vercel.app/" target="_blank" rel="noopener">Live Site ↗</a>
+<section id="work" class="work-sec">
+  <div class="work-pin">
+    <div class="wrap work-head">
+      <div class="sec-head">
+        <div>
+          <div class="sec-num">FEATURED WORK</div>
+          <div class="sec-title">Things I've built</div>
         </div>
+        <div class="sec-desc">Scroll to flip through one project at a time, or jump straight to one.</div>
       </div>
+      <div class="work-nav" id="workNav" role="tablist" aria-label="Projects"></div>
+      <div class="work-progress"><span id="workBar"></span></div>
     </div>
-    <div class="work-card magnetic-card no-thumb paint-hover">
-      <div class="work-body">
-        <div class="kicker">Behavioral Biometrics · Continuous Authentication · Full Stack</div>
-        <h3>Second Sense</h3>
-        <p>A continuous authentication system that learns typing rhythm and mouse movement, then flags a real-time risk score if behavior stops matching after login. Full stack with a frontend, scoring backend, behavioral-baseline database, and automated alerts, packaged with Docker and CI/CD.</p>
-        <span class="tag">Security</span><span class="tag">Full-Stack</span><span class="tag">Docker</span>
-        <div class="work-links">
-          <a href="https://second-sense-frontend.vercel.app/" target="_blank" rel="noopener">Live Site ↗</a>
-        </div>
-      </div>
-    </div>
-    <div class="work-card magnetic-card no-thumb paint-hover">
-      <div class="work-body">
-        <div class="kicker">Automation · Monitoring · Discord API</div>
-        <h3>Sentinel — Health & Alerting Automation</h3>
-        <p>A lightweight monitoring layer that replaces manual status checks with automated ones, routing real-time alerts to Discord. Cuts response time on issues before they escalate.</p>
-        <span class="tag">Monitoring</span><span class="tag">DevOps</span>
-        <div class="work-links">
-          <a href="https://sentinel-uptime-monitor-docs.vercel.app/" target="_blank" rel="noopener">Live Site ↗</a>
-        </div>
-      </div>
-    </div>
-    <div class="work-card magnetic-card no-thumb paint-hover">
-      <div class="work-body">
-        <div class="kicker">Real-Time · HTML5 · CSS3 · Vanilla JavaScript · Node.js · Express.js · WebSockets · npm</div>
-        <h3>Splitbill.live</h3>
-        <p>A shared bill-splitting tool where totals sync live for everyone as items get added, with no app or account required. Handles tax, tip, and multiple currencies automatically, ready to hand off via Venmo or GCash.</p>
-        <span class="tag">Real-Time Sync</span><span class="tag">Multi-Currency</span>
-        <div class="work-links">
-          <a href="https://splitbill-5ulc.onrender.com" target="_blank" rel="noopener">Live Site ↗</a>
-        </div>
-      </div>
-    </div>
-    <div class="work-card magnetic-card no-thumb paint-hover">
-      <div class="work-body">
-        <div class="kicker">Python · GitHub Actions · Google Drive API</div>
-        <h3>Automated Cloud Backup System</h3>
-        <p>A scheduled Python tool wired into GitHub Actions that syncs files straight to Google Drive, with credentials locked down via GitHub Secrets. Removes the "did I back that up" anxiety entirely.</p>
-        <span class="tag">Automation</span><span class="tag">Cloud</span>
-        <div class="work-links">
-          <a href="https://github.com/JudeaTablate/cloud-auto-backup" target="_blank" rel="noopener">View Code ↗</a>
-        </div>
-      </div>
-    </div>
-    <div class="work-card magnetic-card no-thumb paint-hover">
-      <div class="work-body">
-        <div class="kicker">React · JavaScript · HTML5 · CSS3 · Three.js · WebGL · GSAP · ScrollTrigger · Vite · Google Gemini API </div>
-        <h3>Wine About It</h3>
-        <p>A front-end site that teaches wine basics without the snobbery — varietals, tasting notes, and pairing guidance in plain language. Built with Next.js, deployed on Vercel.</p>
-        <span class="tag">Content Site</span><span class="tag">Next.js</span>
-        <div class="work-links">
-          <a href="https://wine-about-it.vercel.app/" target="_blank" rel="noopener">Live Site ↗</a>
-        </div>
-      </div>
-    </div>
+    <div class="work-viewport"><div class="work-track" id="workTrack"></div></div>
   </div>
 </section>
 
@@ -256,9 +201,9 @@
     </div>
   </div>
   <div class="mini-grid">
-    <div class="mini-card magnetic-card paint-hover"><div class="ic">🧠</div><h4>Leveling up applied AI/ML</h4><p>Building toward AI Engineering roles, one project at a time.</p></div>
-    <div class="mini-card magnetic-card paint-hover"><div class="ic">🛠️</div><h4>Shipping automation projects</h4><p>Cloud backups, monitoring, alerting — small tools that remove manual work.</p></div>
-    <div class="mini-card magnetic-card paint-hover"><div class="ic">🎓</div><h4>Finishing my CS degree</h4><p>Software Engineering track at FEU Institute of Technology.</p></div>
+    <div class="mini-card magnetic-card paint-hover"><div class="ic" data-icon="brain"></div><h4>Leveling up applied AI/ML</h4><p>Building toward AI Engineering roles, one project at a time.</p></div>
+    <div class="mini-card magnetic-card paint-hover"><div class="ic" data-icon="tools"></div><h4>Shipping automation projects</h4><p>Cloud backups, monitoring, alerting — small tools that remove manual work.</p></div>
+    <div class="mini-card magnetic-card paint-hover"><div class="ic" data-icon="cap"></div><h4>Finishing my CS degree</h4><p>Software Engineering track at FEU Institute of Technology.</p></div>
   </div>
 </section>
 
@@ -383,7 +328,7 @@
   <h2>Got a role in mind?<br>Let's talk.</h2>
   <a class="em" href="mailto:judeaannctablate@gmail.com">judeaannctablate@gmail.com</a>
   <div style="margin-top:26px; display:flex; gap:14px; justify-content:center; flex-wrap:wrap;">
-    <a class="btn solid magnetic paint-hover js-email-btn" href="mailto:judeaannctablate@gmail.com" data-email="judeaannctablate@gmail.com">Send an email ✦</a>
+    <a class="btn solid magnetic paint-hover js-email-btn" href="mailto:judeaannctablate@gmail.com" data-email="judeaannctablate@gmail.com">Send an email <span class="ic-i" data-icon="sparkle"></span></a>
     <a class="btn ghost magnetic paint-hover" href="https://www.linkedin.com/in/judea-ann-tablate-65a8901b7/" target="_blank" rel="noopener">LinkedIn ↗</a>
     <a class="btn ghost magnetic paint-hover" href="https://github.com/JudeaTablate" target="_blank" rel="noopener">GitHub ↗</a>
     <a class="btn ghost magnetic paint-hover" href="tel:+639087288413">Call +63 908 728 8413</a>

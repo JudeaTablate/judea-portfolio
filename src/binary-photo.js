@@ -3,9 +3,11 @@
 // follows the image's brightness map, so the numbers trace the photo's
 // contours without hiding who it is. Idle: gentle flicker. Hover: faster,
 // more active digit movement.
-export function initBinaryPhoto(canvas, imgSrc, container) {
+export function initBinaryPhoto(canvas, srcs, container) {
+  // srcs = [defaultPhoto, hoverPhoto]; hover (or tap) crossfades to the second one
+  const [srcA, srcB] = Array.isArray(srcs) ? srcs : [srcs, srcs];
   const ctx = canvas.getContext('2d');
-  const COLS = 30;
+  const COLS = 34;
   let ROWS = 36;
   let cellW, cellH, W, H;
   let brightness = [];
@@ -14,8 +16,11 @@ export function initBinaryPhoto(canvas, imgSrc, container) {
   let hovered = false;
 
   const img = new Image();
-  img.crossOrigin = 'anonymous';
-  img.src = imgSrc;
+  const imgB = new Image();
+  let mix = 0, readyB = false;
+  img.src = srcA;
+  imgB.onload = () => { readyB = true; };
+  imgB.src = srcB;
 
   function buildBrightnessGrid() {
     const off = document.createElement('canvas');
@@ -56,10 +61,12 @@ export function initBinaryPhoto(canvas, imgSrc, container) {
 
   container.addEventListener('mouseenter', () => { hovered = true; });
   container.addEventListener('mouseleave', () => { hovered = false; });
+  let tapT;
+  container.addEventListener('touchstart', () => { hovered = true; clearTimeout(tapT); tapT = setTimeout(() => { hovered = false; }, 1800); }, { passive: true });
 
   // draw the real photo, covering the canvas (object-fit: cover behavior)
-  function drawPhotoCover() {
-    const iw = img.naturalWidth, ih = img.naturalHeight;
+  function drawPhotoCover(im, alpha = 1) {
+    const iw = im.naturalWidth, ih = im.naturalHeight;
     const canvasRatio = W / H, imgRatio = iw / ih;
     let sx, sy, sw, sh;
     if (imgRatio > canvasRatio) {
@@ -67,7 +74,9 @@ export function initBinaryPhoto(canvas, imgSrc, container) {
     } else {
       sw = iw; sh = iw / canvasRatio; sx = 0; sy = (ih - sh) / 2;
     }
-    ctx.drawImage(img, sx, sy, sw, sh, 0, 0, W, H);
+    ctx.globalAlpha = alpha;
+    ctx.drawImage(im, sx, sy, sw, sh, 0, 0, W, H);
+    ctx.globalAlpha = 1;
   }
 
   let t = 0;
@@ -79,7 +88,9 @@ export function initBinaryPhoto(canvas, imgSrc, container) {
     const c3 = styles.getPropertyValue('--accent').trim() || '#b983ff';
 
     // base layer: the real photo, true colors
-    drawPhotoCover();
+    mix += ((hovered && readyB ? 1 : 0) - mix) * 0.12;
+    drawPhotoCover(img, 1);
+    if (mix > 0.01) drawPhotoCover(imgB, mix);
     // subtle dark scrim so digits stay legible over any photo
     ctx.fillStyle = 'rgba(5,8,20,0.28)';
     ctx.fillRect(0, 0, W, H);

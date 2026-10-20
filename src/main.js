@@ -4,6 +4,12 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
 import { initNeuralScene, initFloatingShape } from './three-scene.js';
 import { initBinaryPhoto } from './binary-photo.js';
+import { ICONS, injectIcons } from './icons.js';
+import { initGallery } from './gallery.js';
+import { nextJoke } from './jokes.js';
+import { PALETTES, setPalette, clickSound, isOn } from './audio.js';
+import { themeTransition } from './theme-fx.js';
+import { initAvatar } from './avatar.js';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -176,7 +182,7 @@ document.querySelectorAll('.magnetic-card').forEach((card) => {
 
   const photoCanvas = document.getElementById('binaryPhoto');
   const photoContainer = document.querySelector('.hero-photo');
-  if (photoCanvas && photoContainer) initBinaryPhoto(photoCanvas, '/judea-photo.jpg', photoContainer);
+  if (photoCanvas && photoContainer) initBinaryPhoto(photoCanvas, ['/judea-poker.jpg', '/judea-jolly.jpg'], photoContainer);
 
   ScrollTrigger.create({
     trigger: heroSection,
@@ -190,6 +196,24 @@ document.querySelectorAll('.magnetic-card').forEach((card) => {
     },
   });
 })();
+
+/* ================= PROJECT GALLERY (one at a time, horizontal) ================= */
+injectIcons();
+const gallery = initGallery(lenis, injectIcons);
+(function () {
+  const sub = document.getElementById('mmProjects');
+  if (!sub) return;
+  sub.innerHTML = gallery.projects.map((p, i) => `<a href="#work" data-proj="${i}">${p.title}</a>`).join('');
+  sub.addEventListener('click', (e) => {
+    const a = e.target.closest('[data-proj]');
+    if (!a) return;
+    e.preventDefault();
+    e.stopPropagation();
+    document.getElementById('hamburgerBtn').click();
+    setTimeout(() => gallery.goTo(+a.dataset.proj), 320);
+  });
+})();
+initAvatar(lenis);
 
 /* ================= CONTACT 3D ACCENT ================= */
 (function () {
@@ -376,7 +400,7 @@ document.querySelectorAll('.sec-title').forEach((title) => {
       '  contact       — how to reach me',
       '  sudo hire-me  — try it and see',
       '  coffee        — status report',
-      '  joke          — a CS joke, brace yourself',
+      '  joke          — fresh dev-life humor (there are a lot)',
       '  clear         — wipe the terminal',
     ].join('\n'),
     whoami: () => 'judea_ann_tablate — BSCS (Software Engineering), FEU Institute of Technology. Aspiring AI & ML Engineer / Web Developer.',
@@ -384,8 +408,8 @@ document.querySelectorAll('.sec-title').forEach((title) => {
     projects: () => '1) PsyClick — clinical psychomotor screening (thesis, team ByteMe) — Lead Researcher & Documentation Specialist\n2) Sentinel — health monitoring → real-time Discord alerts\n3) Automated Cloud Backup System — Python + GitHub Actions → Google Drive',
     experience: () => 'Discipline Unit, FEUTech (Student Assistant) · FEU Tech Library (Student Assistant) · Student Coordinating Council (Exec Secretary) · ACM (Assoc. Director, Logistics) · JPCS, SCC & ACM (Jr. Officer, Logistics)',
     contact: () => 'judeaannctablate@gmail.com · +63 908 728 8413 · github.com/JudeaTablate · linkedin.com/in/judea-ann-tablate-65a8901b7',
-    coffee: () => '☕ status: 74% full. sufficient for approximately 3.5 more hours of debugging.',
-    joke: () => 'why do programmers prefer dark mode? because light attracts bugs.',
+    coffee: () => '[ c(_) ] status: 74% full. sufficient for approximately 3.5 more hours of debugging.',
+    joke: () => nextJoke(),
     clear: () => { body.innerHTML = ''; return null; },
   };
 
@@ -464,32 +488,45 @@ setInterval(tick, 1000);
   });
 })();
 
-/* ================= THEME + SOUND TOGGLES ================= */
-let soundOn = false, actx;
+/* ================= THEME (sunrise / night-falls) ================= */
 const themeBtn = document.getElementById('themeBtn');
-const soundBtn = document.getElementById('soundBtn');
-
-themeBtn.addEventListener('click', () => {
-  const cur = document.body.getAttribute('data-theme');
-  const next = cur === 'dark' ? 'light' : 'dark';
+function applyTheme(next) {
   document.body.setAttribute('data-theme', next);
-  themeBtn.textContent = 'THEME[' + next + ']';
-  playTone(660, 0.08);
-});
-soundBtn.addEventListener('click', () => {
-  soundOn = !soundOn;
-  soundBtn.textContent = 'SOUND[' + (soundOn ? 'on' : 'off') + ']';
-  if (soundOn) playTone(500, 0.06);
-});
-function playTone(freq = 520, dur = 0.06, type = 'sine', vol = 0.05) {
-  if (!soundOn) return;
-  try {
-    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
-    const o = actx.createOscillator(), g = actx.createGain();
-    o.type = type; o.frequency.value = freq; g.gain.value = vol;
-    o.connect(g); g.connect(actx.destination);
-    o.start(); g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + dur);
-    o.stop(actx.currentTime + dur);
-  } catch (e) {}
+  const light = next === 'light';
+  document.getElementById('themeLabel').textContent = light ? 'Dark' : 'Light';
+  const ic = document.getElementById('themeIc');
+  ic.innerHTML = ICONS[light ? 'moon' : 'sun'];
+  themeBtn.setAttribute('aria-label', light ? 'Switch to dark mode' : 'Switch to light mode');
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', light ? '#F6F3FF' : '#0A0E27');
 }
-document.addEventListener('click', () => playTone(420, 0.05), true);
+themeBtn.addEventListener('click', () => {
+  const toLight = document.body.getAttribute('data-theme') === 'dark';
+  themeTransition(toLight, () => applyTheme(toLight ? 'light' : 'dark'));
+});
+
+/* ================= SOUND DROPDOWN (7 synthesized moods) ================= */
+(function () {
+  const menu = document.getElementById('soundMenu');
+  const btn = document.getElementById('soundBtn');
+  const list = document.getElementById('soundList');
+  const label = document.getElementById('soundLabel');
+  let cur = 'off';
+  list.innerHTML = PALETTES.map(([id, name]) => `<li role="option" tabindex="0" data-id="${id}" aria-selected="${id === 'off'}">${name}</li>`).join('');
+  const close = () => { menu.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); };
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const o = menu.classList.toggle('open');
+    btn.setAttribute('aria-expanded', String(o));
+  });
+  const choose = (li) => {
+    cur = li.dataset.id;
+    setPalette(cur);
+    label.textContent = cur === 'off' ? 'Sound: Off' : PALETTES.find((p) => p[0] === cur)[1];
+    list.querySelectorAll('li').forEach((x) => x.setAttribute('aria-selected', String(x === li)));
+    close();
+  };
+  list.addEventListener('click', (e) => { const li = e.target.closest('li'); if (li) { e.stopPropagation(); choose(li); } });
+  list.addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target.dataset.id) { e.preventDefault(); choose(e.target); } if (e.key === 'Escape') close(); });
+  document.addEventListener('click', (e) => { if (!menu.contains(e.target)) close(); });
+})();
+document.addEventListener('click', () => { if (isOn()) clickSound(); }, true);
