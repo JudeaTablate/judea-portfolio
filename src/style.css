@@ -529,23 +529,24 @@ footer{border-top:1px solid var(--line); padding:26px 0; }
 @media (min-width:861px) and (max-width:1100px){ .proj{gap:28px;} .proj-info p{font-size:17px;} }
 
 /* ---- walking avatar ---- */
-#walker{position:fixed; left:0; bottom:0; z-index:150; width:clamp(92px, 11vw, 168px); pointer-events:none; will-change:transform; filter:drop-shadow(0 8px 14px rgba(0,0,0,.25));}
+#walker{position:fixed; left:0; top:0; z-index:150; width:clamp(120px, 13vw, 200px); pointer-events:none; will-change:transform;}
 #walker svg{width:100%; height:auto; display:block; overflow:visible;}
-.walker-flip{transform-origin:50% 100%;}
-.av-body{transform-origin:50px 190px;}
-.av-leg,.av-arm{transform-box:view-box;}
-.av-leg{transform-origin:50px 124px;} .av-arm-b{transform-origin:33px 66px;} .av-arm-f{transform-origin:69px 66px;}
-#walker .av-leg-f,#walker .av-arm-b{animation:swingA .62s ease-in-out infinite alternate paused;}
-#walker .av-leg-b,#walker .av-arm-f{animation:swingB .62s ease-in-out infinite alternate paused;}
-#walker .av-body{animation:bob .31s ease-in-out infinite alternate paused;}
-#walker.walking .av-leg,#walker.walking .av-arm,#walker.walking .av-body{animation-play-state:running;}
-#walker:not(.walking) .av-body{animation:idle 2.6s ease-in-out infinite alternate;}
-#walker:not(.walking) .av-leg,#walker:not(.walking) .av-arm{animation:none; transform:none;}
-@keyframes swingA{from{transform:rotate(-24deg);}to{transform:rotate(24deg);}}
-@keyframes swingB{from{transform:rotate(24deg);}to{transform:rotate(-24deg);}}
-@keyframes bob{from{transform:translateY(0);}to{transform:translateY(-3px);}}
-@keyframes idle{from{transform:translateY(0);}to{transform:translateY(-2px);}}
-.av-eyes{animation:blink 4.5s infinite; transform-origin:51px 38px; transform-box:view-box;}
+.walker-squash,.walker-flip{transform-origin:50% 100%;}
+.walker-cloud{position:absolute; left:-4%; right:-4%; bottom:-6%; opacity:0; transform-origin:50% 100%;}
+.walker-cloud svg{width:100%;}
+#walker .walker-flip svg{filter:drop-shadow(0 8px 12px rgba(120,30,70,.25));}
+.av-body{transform-origin:100px 280px; animation:idle 2.4s ease-in-out infinite alternate;}
+.av-leg,.av-arm,.av-head{transform-box:view-box;}
+.av-leg{transform-origin:100px 198px;} .av-arm-b{transform-origin:72px 122px;} .av-arm-f{transform-origin:128px 122px;} .av-head{transform-origin:100px 110px; animation:headtilt 3.2s ease-in-out infinite alternate;}
+#walker.jumping .av-arm-b{transform:rotate(150deg); transition:transform .15s;} #walker.jumping .av-arm-f{transform:rotate(-150deg); transition:transform .15s;}
+#walker.jumping .av-leg-b{transform:rotate(-18deg);} #walker.jumping .av-leg-f{transform:rotate(22deg);}
+#walker.posing .av-arm-f{animation:wave .45s ease-in-out infinite alternate;} #walker.posing .av-arm-b{transform:rotate(22deg);}
+.av-sp{transform-box:fill-box; transform-origin:center; animation:twinkle 1.8s ease-in-out infinite;} .av-sp.s2{animation-delay:.4s} .av-sp.s3{animation-delay:.8s} .av-sp.s4{animation-delay:1.2s}
+@keyframes twinkle{0%,100%{transform:scale(.4);opacity:.3;}50%{transform:scale(1.15);opacity:1;}}
+@keyframes wave{from{transform:rotate(-140deg);}to{transform:rotate(-165deg);}}
+@keyframes headtilt{from{transform:rotate(-2deg);}to{transform:rotate(2deg);}}
+@keyframes idle{from{transform:translateY(0) scaleY(1);}to{transform:translateY(-3px) scaleY(1.01);}}
+.av-eyes{animation:blink 4.5s infinite; transform-origin:100px 84px; transform-box:view-box;}
 @keyframes blink{0%,94%,100%{transform:scaleY(1);}97%{transform:scaleY(.1);}}
 
 /* ---- theme transition overlay ---- */
@@ -599,13 +600,13 @@ img, svg, canvas, iframe{max-width:100%;}
   .sound-list{right:-48px;}
   #contact h2{font-size:clamp(28px,8.5vw,40px);}
   .term-body{height:240px;}
-  #walker{width:84px;}
+  #walker{width:96px;}
   .kinetic-text{font-size:clamp(20px,6vw,28px);}
 }
 @media (max-width:360px){ .tech-tile{min-width:86px; height:90px;} h1{font-size:30px;} }
-@media (max-height:520px) and (orientation:landscape){ .hero{padding:30px 0;} #walker{width:70px;} }
+@media (max-height:520px) and (orientation:landscape){ .hero{padding:30px 0;} #walker{width:80px;} }
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important;}
-  #walker .av-body{animation:none !important;}
+  #walker .av-body,.av-sp,.av-head{animation:none !important;}
 }
 @media (hover:none){ .toolbtn,.work-nav button,.sound-list li{cursor:pointer;} }
