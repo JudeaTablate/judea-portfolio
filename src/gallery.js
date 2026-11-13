@@ -113,7 +113,7 @@ export function initGallery(lenis, injectIcons) {
       x: () => -(track.scrollWidth - track.parentElement.clientWidth),
       ease: 'none',
       scrollTrigger: {
-        trigger: sec, pin: true, start: 'top top', end: () => '+=' + n * window.innerHeight * 0.85,
+        trigger: sec, pin: true, start: () => `top ${document.getElementById('siteHeader')?.offsetHeight || 0}px`, end: () => '+=' + n * window.innerHeight * 0.85,
         scrub: 0.4, invalidateOnRefresh: true, anticipatePin: 1,
         onUpdate(self) {
           const i = Math.round(self.progress * (n - 1));
