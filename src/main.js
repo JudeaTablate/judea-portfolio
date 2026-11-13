@@ -35,19 +35,29 @@ let p = 0;
 const fill = document.getElementById('loadFill');
 const pctEl = document.getElementById('loadPct');
 const loader = document.getElementById('loader');
+const ldLetters = [...loader.querySelectorAll('.ld-l')];
+const ldHi = document.getElementById('ldHi');
+const ldStatus = document.getElementById('ldStatus');
+const HI = ['Hi', 'Kumusta', 'Hola', 'Bonjour', 'こんにちは', '안녕', '你好', 'Ciao'];
+const STATUS = ['booting systems', 'warming up neurons', 'compiling vibes', 'almost there', 'ready'];
+let hiI = 0;
+const hiTimer = setInterval(() => { hiI = (hiI + 1) % HI.length; ldHi.textContent = HI[hiI]; }, 420);
 const li = setInterval(() => {
-  p += Math.random() * 22;
+  p += 3 + Math.random() * 12;
   if (p >= 100) {
     p = 100;
     clearInterval(li);
     setTimeout(() => {
+      clearInterval(hiTimer);
       loader.classList.add('hide');
-      playHeroIntro();
-    }, 350);
+      setTimeout(playHeroIntro, 500);
+    }, 450);
   }
   fill.style.width = p + '%';
-  pctEl.textContent = Math.floor(p) + '%';
-}, 150);
+  pctEl.textContent = String(Math.floor(p)).padStart(3, '0');
+  ldLetters.forEach((el, i) => el.style.setProperty('--p', Math.max(0, Math.min(100, p * 1.5 - i * 22))));
+  ldStatus.textContent = STATUS[Math.min(STATUS.length - 1, Math.floor(p / 25))];
+}, 140);
 
 /* ================= HERO INTRO ANIMATION (word-by-word) ================= */
 const heroTitle = document.getElementById('heroTitle');

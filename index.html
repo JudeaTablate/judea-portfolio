@@ -11,10 +11,19 @@
 </head>
 <body data-theme="dark">
 
-<div id="loader">
-  <div class="lg">JUDEA.SYS</div>
-  <div class="pct" id="loadPct">0%</div>
-  <div class="track"><div class="fill" id="loadFill"></div></div>
+<div id="loader" role="status" aria-label="Loading portfolio">
+  <div class="ld-content">
+    <div class="ld-top lcd"><span>JUDEA.SYS</span><span id="ldHi">Hi</span></div>
+    <div class="ld-word" aria-hidden="true">
+      <span class="ld-mask"><span class="ld-l" style="--i:0">J</span></span><span class="ld-mask"><span class="ld-l" style="--i:1">U</span></span><span class="ld-mask"><span class="ld-l" style="--i:2">D</span></span><span class="ld-mask"><span class="ld-l" style="--i:3">E</span></span><span class="ld-mask"><span class="ld-l" style="--i:4">A</span></span>
+    </div>
+    <div class="ld-sub">Ann C. Tablate <i></i> AI/ML <i></i> Web Developer</div>
+    <div class="ld-bottom lcd">
+      <span class="ld-status" id="ldStatus">booting systems</span>
+      <span class="pct" id="loadPct">000</span>
+    </div>
+    <div class="track"><div class="fill" id="loadFill"></div></div>
+  </div>
 </div>
 
 <div id="cursorRing"></div>
@@ -28,6 +37,8 @@
       <a href="#work">Work</a>
       <a href="#skills">Skills</a>
       <a href="#experience">Experience</a>
+  <a href="#wins">Wins</a>
+      <a href="#wins">Wins</a>
       <a href="#certificates">Certs</a>
       <a href="#contact">Contact</a>
     </div>
@@ -190,6 +201,37 @@
         <div><div class="exp-org">Association for Computing Machinery</div><div class="exp-role">Junior Officer of Logistics — supported event logistics, setup, inventory, and coordination</div></div>
         <div class="exp-arrow">↗</div>
       </div>
+</section>
+
+<section id="wins" class="pad wrap reveal">
+  <div class="sec-head">
+    <div>
+      <div class="sec-num">WINS & RECOGNITION</div>
+      <div class="sec-title">Receipts</div>
+    </div>
+    <div class="sec-desc">Academic honors and competition wins.</div>
+  </div>
+  <div class="wins-grid">
+    <div class="win-card win-feature magnetic-card paint-hover">
+      <div class="win-top"><div class="ic" data-icon="trophy"></div><span class="win-when lcd">2026</span></div>
+      <h3>P&G Next AIdeathon 2026</h3>
+      <ul class="win-list">
+        <li><span class="ic" data-icon="medal"></span>2nd Place</li>
+        <li><span class="ic" data-icon="star"></span>Next 8 Winner &mdash; Digital Product Manager</li>
+        <li><span class="ic" data-icon="sparkle"></span>Social Media Challenge Winner</li>
+      </ul>
+    </div>
+    <div class="win-card magnetic-card paint-hover">
+      <div class="win-top"><div class="ic" data-icon="cap"></div><span class="win-when lcd">2023 &ndash; present</span></div>
+      <h3>FEU Tech Elite Academic Scholar</h3>
+      <p>Scholarship held continuously since 2023.</p>
+    </div>
+    <div class="win-card magnetic-card paint-hover">
+      <div class="win-top"><div class="ic" data-icon="star"></div><span class="win-when lcd">3rd Term, S.Y. 2024&ndash;2025</span></div>
+      <h3>Dean&rsquo;s Lister</h3>
+      <p>Recognized for top academic standing at FEU Institute of Technology.</p>
+    </div>
+  </div>
 </section>
 
 <section class="pad wrap reveal">

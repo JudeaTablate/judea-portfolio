@@ -3,6 +3,9 @@ const s = (body, vb = 32) =>
   `<svg viewBox="0 0 ${vb} ${vb}" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${body}</svg>`;
 
 export const ICONS = {
+  trophy: s('<path d="M10 4h12v8a6 6 0 0 1-12 0V4Z"/><path d="M10 7H5v2a5 5 0 0 0 5 5M22 7h5v2a5 5 0 0 1-5 5"/><path d="M16 18v5M11 28h10M12.5 23h7l1 5h-9Z"/>'),
+  medal: s('<circle cx="16" cy="19" r="7.5"/><path d="m11 4 5 8 5-8M16 15.5v7M13.5 18l2.5-2.5v7"/>'),
+  star: s('<path d="m16 3.5 3.6 7.6 8.2 1-6 5.7 1.6 8.2L16 21.9l-7.4 4.1 1.6-8.2-6-5.7 8.2-1L16 3.5Z"/>'),
   brain: s('<path d="M12 6.5a4 4 0 0 0-4 4 3.6 3.6 0 0 0-2 3.2 3.6 3.6 0 0 0 2 3.2 4 4 0 0 0 4 4.6V6.5Z"/><path d="M20 6.5a4 4 0 0 1 4 4 3.6 3.6 0 0 1 2 3.2 3.6 3.6 0 0 1-2 3.2 4 4 0 0 1-4 4.6V6.5Z"/><circle cx="16" cy="9" r="1.2" fill="currentColor"/><circle cx="16" cy="16" r="1.2" fill="currentColor"/><circle cx="16" cy="23" r="1.2" fill="currentColor"/><path d="M8.5 13.5h3M20.5 13.5h3M9 19h3M20 19h3"/>'),
   tools: s('<rect x="3.5" y="6" width="25" height="20" rx="4"/><path d="m11 13 -4 3 4 3M21 13l4 3-4 3M17.5 12l-3 8"/>'),
   cap: s('<path d="M16 6 3 12.5 16 19l13-6.5L16 6Z"/><path d="M8 15.5V21c0 1.8 3.6 3.5 8 3.5s8-1.7 8-3.5v-5.5"/><path d="M29 12.5V20"/><circle cx="29" cy="21.5" r="1.3" fill="currentColor"/>'),
