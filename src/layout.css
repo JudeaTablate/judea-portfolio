@@ -318,3 +318,22 @@ section.chapter.pad{padding:clamp(64px,10vh,110px) 28px;}
   .where-sheet{left:max(20px,env(safe-area-inset-left)); transform:translateY(12px);}
   .where-sheet.open{transform:none;}
 }
+/* spotify tops */
+.sp-tops{display:grid; grid-template-columns:1.2fr 1fr; gap:clamp(24px,5vw,64px); margin-top:20px;}
+.sp-tops .otc-sub small{font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-dim); font-style:normal; margin-left:8px;}
+.sp-tracks{list-style:none; padding:0; display:flex; flex-direction:column; gap:6px;}
+.sp-tracks a{display:flex; align-items:center; gap:14px; padding:8px 10px; border-radius:12px; transition:background .2s;}
+.sp-tracks a:hover{background:color-mix(in srgb,var(--surface) 70%,transparent);}
+.sp-n{font-size:13px; color:var(--accent2); width:22px;}
+.sp-tracks img,.sp-noart{width:48px; height:48px; border-radius:6px; object-fit:cover; background:var(--surface); flex:none;}
+.sp-tt{display:flex; flex-direction:column; min-width:0;} .sp-tt b{font-family:var(--serif); font-weight:400; font-size:21px; line-height:1.15; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;} .sp-tt i{font-style:normal; color:var(--text-dim); font-size:15px;}
+.sp-artists{display:flex; flex-wrap:wrap; gap:16px;}
+.sp-artist{display:flex; flex-direction:column; align-items:center; gap:8px; width:84px; text-align:center;}
+.sp-artist span{position:relative; width:76px; height:76px; border-radius:50%; overflow:hidden; background:linear-gradient(160deg,hsl(var(--h) 55% 60%),hsl(calc(var(--h) + 50) 50% 30%)); border:2px solid var(--line); transition:transform .3s var(--ease), border-color .2s;}
+.sp-artist img{width:100%; height:100%; object-fit:cover;}
+.sp-artist:hover span{transform:scale(1.07) rotate(-3deg); border-color:var(--accent2);}
+.sp-artist b{font-size:14px; font-weight:600; line-height:1.2;}
+.sp-genres{display:flex; flex-wrap:wrap; gap:8px; margin-top:22px;}
+.sp-genres span{font-family:var(--serif); font-style:italic; font-size:18px; padding:5px 14px; border-radius:999px; border:1px solid color-mix(in srgb,var(--accent3) 45%,var(--line));}
+.sp-tops[hidden]{display:none;}
+@media (max-width:800px){ .sp-tops{grid-template-columns:1fr;} }

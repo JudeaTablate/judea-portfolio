@@ -8,7 +8,7 @@ import http from 'node:http';
 const { SPOTIFY_CLIENT_ID: id, SPOTIFY_CLIENT_SECRET: secret } = process.env;
 if (!id || !secret) { console.error('Set SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET first.'); process.exit(1); }
 const redirect = 'http://127.0.0.1:8888/callback';
-const scope = 'user-read-currently-playing user-read-recently-played';
+const scope = 'user-read-currently-playing user-read-recently-played user-top-read';
 console.log('\nOpen this link in your browser:\n');
 console.log(`https://accounts.spotify.com/authorize?response_type=code&client_id=${id}&scope=${encodeURIComponent(scope)}&redirect_uri=${encodeURIComponent(redirect)}\n`);
 http.createServer(async (req, res) => {

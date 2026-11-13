@@ -70,6 +70,12 @@ function renderMusic(s) {
   if (embed) {
     $('spEmbed').innerHTML = `<iframe title="Spotify player" src="https://open.spotify.com/embed/${embed[1]}/${embed[2]}?utm_source=generator&theme=0" width="100%" height="352" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>`;
   }
+  if (s && (s.topTracks?.length || s.topArtists?.length)) {
+    $('spTops').hidden = false;
+    $('spTracks').innerHTML = (s.topTracks || []).map((t, i) => `<li><a href="${esc(t.url)}" target="_blank" rel="noopener"><span class="sp-n lcd">${String(i + 1).padStart(2, '0')}</span>${t.art ? `<img src="${esc(t.art)}" alt="" loading="lazy">` : '<span class="sp-noart"></span>'}<span class="sp-tt"><b>${esc(t.title)}</b><i>${esc(t.artist)}</i></span></a></li>`).join('');
+    $('spArtists').innerHTML = (s.topArtists || []).map((a) => `<a class="sp-artist" href="${esc(a.url)}" target="_blank" rel="noopener"><span style="--h:${hue(a.name)}">${a.art ? `<img src="${esc(a.art)}" alt="" loading="lazy">` : ''}</span><b>${esc(a.name)}</b></a>`).join('');
+    $('spGenres').innerHTML = (s.genres || []).map((g) => `<span>${esc(g)}</span>`).join('');
+  }
   if (!s || !s.title) return;
   $('spState').textContent = s.playing ? 'listening right now' : 'last played';
   $('spTitle').textContent = s.title;
@@ -90,7 +96,9 @@ getJSON('/api/media').then((d) => {
   if (d.at) $('otcUpdated').textContent = 'updated ' + fmtDate(d.at);
 }).catch(() => { renderFilms(null); renderWords(null); });
 renderMusic(null);
-getJSON('/api/spotify').then(renderMusic).catch(() => {});
+const loadSpotify = () => getJSON('/api/spotify').then(renderMusic).catch(() => {});
+loadSpotify();
+setInterval(() => { if (!document.hidden) loadSpotify(); }, 45000);
 
 /* ---------- motion ---------- */
 if (!reduceMotion) {
