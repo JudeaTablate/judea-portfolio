@@ -12,6 +12,7 @@ export default async function handler(req, res) {
       headers: { Authorization: 'Basic ' + Buffer.from(`${id}:${secret}`).toString('base64'), 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({ grant_type: 'refresh_token', refresh_token: refresh }),
     }).then((r) => r.json());
+    if (!tok.access_token) return res.status(200).json({ configured: true, error: 'token', detail: tok.error_description || tok.error || 'no access token' });
     const auth = { Authorization: `Bearer ${tok.access_token}` };
     const shape = (t, playing) => t && ({
       configured: true, playing, title: t.name, artist: (t.artists || []).map((a) => a.name).join(', '),
@@ -38,8 +39,9 @@ export default async function handler(req, res) {
     const count = {};
     artistItems.forEach((a, i) => (a.genres || []).forEach((g) => { count[g] = (count[g] || 0) + (8 - i); }));
     const genres = Object.entries(count).sort((x, y) => y[1] - x[1]).slice(0, 6).map(([g]) => g);
-    return res.status(200).json({ configured: true, ...(current || {}), topTracks, topArtists, genres });
-  } catch {
-    return res.status(200).json({ configured: true, error: true });
+    const status = { now: nowR.status, recent: recentR.status, tracks: tracksR.status, artists: artistsR.status };
+    return res.status(200).json({ configured: true, ...(current || {}), topTracks, topArtists, genres, status });
+  } catch (e) {
+    return res.status(200).json({ configured: true, error: 'crash', detail: String(e && e.message) });
   }
 }
