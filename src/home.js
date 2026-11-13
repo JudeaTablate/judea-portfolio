@@ -1,3 +1,4 @@
+import '@fontsource/pacifico/400.css';
 import { gsap, store, reduceMotion, paintHover } from './shared.js';
 import { initNeuralScene } from './three-scene.js';
 import { initBinaryPhoto } from './binary-photo.js';
@@ -33,24 +34,43 @@ if (seen || reduceMotion) {
   store.set('ja-loaded', '1', sessionStorage);
   const fill = document.getElementById('loadFill');
   const pctEl = document.getElementById('loadPct');
-  const letters = [...loader.querySelectorAll('.ld-l')];
+  const liquid = document.getElementById('ldLiquid');
   const hiEl = document.getElementById('ldHi');
   const stEl = document.getElementById('ldStatus');
   const HI = ['Hi', 'Kumusta', 'Hola', 'Bonjour', 'こんにちは', '안녕', '你好', 'Ciao'];
-  const STATUS = ['booting systems', 'warming up neurons', 'compiling vibes', 'almost there', 'ready'];
-  let p = 0, hi = 0;
+  const STATUS = ['filling up', 'warming up neurons', 'making waves', 'almost full', 'ready'];
+  const EMPTY = 262, FULL = 4; // liquid y in the SVG: below the letters -> above them
+  let target = 0, shown = 0, hi = 0, done = false;
   const hiT = setInterval(() => { hi = (hi + 1) % HI.length; hiEl.textContent = HI[hi]; }, 420);
-  const t = setInterval(() => {
-    p = Math.min(100, p + 4 + Math.random() * 12);
-    fill.style.width = p + '%';
-    pctEl.textContent = String(Math.floor(p)).padStart(3, '0');
-    letters.forEach((el, i) => el.style.setProperty('--p', Math.max(0, Math.min(100, p * 1.5 - i * 22))));
-    stEl.textContent = STATUS[Math.min(STATUS.length - 1, Math.floor(p / 25))];
-    if (p >= 100) {
-      clearInterval(t);
-      setTimeout(() => { clearInterval(hiT); loader.classList.add('hide'); setTimeout(playHeroIntro, 450); setTimeout(() => loader.remove(), 1500); }, 400);
+  // the "real" progress jumps in chunks; the liquid eases toward it so it always flows smoothly
+  const step = setInterval(() => { target = Math.min(100, target + 3 + Math.random() * 7); if (target >= 100) clearInterval(step); }, 160);
+  const splash = () => {
+    const colors = ['#6ff0e0', '#b983ff', '#ff9ecd'];
+    for (let i = 0; i < 14; i++) {
+      const d = document.createElement('span');
+      const ang = (i / 14) * Math.PI * 2, r = 120 + Math.random() * 160;
+      d.className = 'ld-drop';
+      d.style.cssText = `--c:${colors[i % 3]};--x:${Math.cos(ang) * r}px;--y:${Math.sin(ang) * r * 0.6}px;width:${6 + Math.random() * 10}px;height:${6 + Math.random() * 10}px`;
+      loader.querySelector('.ld-content').appendChild(d);
     }
-  }, 130);
+  };
+  const tickLoader = () => {
+    shown += (target - shown) * 0.06;
+    if (target >= 100 && shown > 99.5) shown = 100;
+    liquid.setAttribute('transform', `translate(0 ${EMPTY - (EMPTY - FULL) * (shown / 100)})`);
+    fill.style.width = shown + '%';
+    pctEl.textContent = String(Math.round(shown)).padStart(3, '0');
+    stEl.textContent = STATUS[Math.min(STATUS.length - 1, Math.floor(shown / 25))];
+    if (shown >= 100 && !done) {
+      done = true;
+      loader.classList.add('full');
+      splash();
+      setTimeout(() => { clearInterval(hiT); loader.classList.add('hide'); setTimeout(playHeroIntro, 450); setTimeout(() => loader.remove(), 1500); }, 800);
+      return;
+    }
+    requestAnimationFrame(tickLoader);
+  };
+  requestAnimationFrame(tickLoader);
 }
 
 /* ---------- greeting cycler ---------- */

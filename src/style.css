@@ -130,10 +130,21 @@ section{position:relative;}
 .ld-top{position:absolute; top:max(22px,env(safe-area-inset-top)); left:clamp(20px,5vw,64px); right:clamp(20px,5vw,64px);}
 .ld-bottom{position:absolute; bottom:calc(max(22px,env(safe-area-inset-bottom)) + 14px); left:clamp(20px,5vw,64px); right:clamp(20px,5vw,64px); align-items:flex-end;}
 #ldHi{color:#ff9ecd; font-style:italic;}
-.ld-word{display:flex; justify-content:center; font-family:'Unbounded',sans-serif; font-weight:900; font-size:clamp(64px,19vw,260px); line-height:1; letter-spacing:-.02em;}
-.ld-mask{display:block; overflow:hidden; padding:.06em .01em .1em;}
-.ld-l{display:block; color:transparent; -webkit-text-stroke:2px rgba(255,255,255,.35); background:linear-gradient(to top,#6ff0e0,#b983ff 55%,#ff9ecd) no-repeat bottom/100% calc(var(--p,0)*1%); -webkit-background-clip:text; background-clip:text; transform:translateY(105%); animation:ldRise .9s cubic-bezier(.2,.9,.2,1) forwards; animation-delay:calc(var(--i)*.09s + .1s); will-change:transform;}
-@keyframes ldRise{to{transform:translateY(0);}}
+.ld-svg{display:block; width:min(92vw,820px); height:auto; margin:0 auto; overflow:visible;}
+.ld-text{font-family:'Pacifico',cursive; font-size:168px;}
+.ld-outline{fill:rgba(255,255,255,.04); stroke:rgba(255,255,255,.28); stroke-width:2.5; stroke-linejoin:round;}
+.ld-shine{fill:none; stroke:rgba(255,255,255,.35); stroke-width:1.2; transform:translate(-2px,-3px);}
+.ld-wave{transform-box:view-box;}
+.ld-w1{animation:ldWave 2.4s linear infinite;}
+.ld-w2{opacity:.75; animation:ldWave 3.6s linear infinite reverse;}
+@keyframes ldWave{from{transform:translateX(0);}to{transform:translateX(-600px);}}
+.ld-bub{transform-box:fill-box; transform-origin:center; opacity:0; animation:ldBub var(--t) ease-in infinite; animation-delay:var(--d);}
+@keyframes ldBub{0%{transform:translateY(0) scale(.4); opacity:0;}20%{opacity:.9;}100%{transform:translateY(-230px) scale(1.1); opacity:0;}}
+#loader.full .ld-svg{animation:ldPop .7s cubic-bezier(.3,1.6,.5,1) forwards;}
+@keyframes ldPop{0%{transform:scale(1);}40%{transform:scale(1.06);}100%{transform:scale(1.02);}}
+.ld-drop{position:absolute; left:50%; top:50%; width:10px; height:10px; border-radius:50%; background:var(--c); pointer-events:none; opacity:0;}
+#loader.full .ld-drop{animation:ldDrop .9s cubic-bezier(.2,.7,.3,1) forwards;}
+@keyframes ldDrop{0%{opacity:1; transform:translate(-50%,-50%) scale(.6);}100%{opacity:0; transform:translate(calc(-50% + var(--x)),calc(-50% + var(--y))) scale(1.3);}}
 .ld-sub{text-align:center; font-size:clamp(14px,1.8vw,20px); letter-spacing:.28em; text-transform:uppercase; color:#cfd0ff; opacity:.85; display:flex; justify-content:center; align-items:center; gap:14px; flex-wrap:wrap;}
 .ld-sub i{width:6px; height:6px; border-radius:50%; background:#ff9ecd; display:inline-block;}
 #loader .pct{font-family:'JetBrains Mono',monospace; font-weight:600; font-size:clamp(40px,7vw,96px); line-height:.9; color:#fff; letter-spacing:-.02em;}
