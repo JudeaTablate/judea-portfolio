@@ -79,13 +79,15 @@ export function initBinaryPhoto(canvas, srcs, container) {
     ctx.globalAlpha = 1;
   }
 
-  let t = 0;
-  function frame() {
-    t += 1;
-    const styles = getComputedStyle(document.body);
-    const c1 = styles.getPropertyValue('--accent3').trim() || '#6ff0e0';
-    const c2 = styles.getPropertyValue('--accent2').trim() || '#ff9ecd';
-    const c3 = styles.getPropertyValue('--accent').trim() || '#b983ff';
+  let t = 0, c1, c2, c3, vis = true, last = 0;
+  const readColors = () => { const s = getComputedStyle(document.body); c1 = s.getPropertyValue('--accent3').trim() || '#6ff0e0'; c2 = s.getPropertyValue('--accent2').trim() || '#ff9ecd'; c3 = s.getPropertyValue('--accent').trim() || '#b983ff'; };
+  readColors();
+  new MutationObserver(readColors).observe(document.body, { attributes: true, attributeFilter: ['data-theme'] });
+  new IntersectionObserver(([e]) => { vis = e.isIntersecting; }).observe(canvas);
+  function frame(now = 0) {
+    if (!vis || document.hidden || now - last < 33) { requestAnimationFrame(frame); return; }
+    last = now;
+    t += 2;
 
     // base layer: the real photo, true colors
     mix += ((hovered && readyB ? 1 : 0) - mix) * 0.12;

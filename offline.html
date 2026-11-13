@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en" data-page="offline">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0A0E27">
+<meta name="description" content="Films, music and essays from Judea, off the clock.">
+<title>Off the Clock — Judea</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<script>try{var t=localStorage.getItem('ja-theme');if(t)document.documentElement.setAttribute('data-theme',t);if(sessionStorage.getItem('ja-nav'))document.documentElement.classList.add('arriving');}catch(e){}</script>
+</head>
+<body>
+<div id="curtain" aria-hidden="true"><div class="curtain-label"><span class="cl-num lcd"></span><span class="cl-name"></span></div></div>
+<div id="cursorRing"></div><div id="cursorDot"></div>
+<header id="siteHeader"></header>
+<div id="mobileMenu" aria-hidden="true"></div>
+
+
+<main id="main" class="otc">
+  <section class="otc-mast wrap">
+    <div class="crumb lcd"><a href="/">Home</a><span>/</span><b>Off the Clock</b></div>
+    <div class="otc-issue lcd"><span>Vol. 01</span><span>Manila</span><span id="otcUpdated">updated live</span></div>
+    <h1 class="otc-title"><span>Off the</span> <em>Clock</em></h1>
+    <p class="otc-lede">The part of me that isn&rsquo;t code. Films I keep coming back to, songs on repeat, and essays I write to think out loud.</p>
+    <nav class="otc-toc" aria-label="On this page">
+      <a href="#films"><span class="lcd">i.</span> Films</a>
+      <a href="#music"><span class="lcd">ii.</span> Music</a>
+      <a href="#words"><span class="lcd">iii.</span> Words</a>
+    </nav>
+  </section>
+
+  <section id="films" class="otc-sec wrap" data-chapter="Films">
+    <div class="otc-head"><span class="otc-n">i.</span><h2>Four <em>favorites</em></h2><a class="otc-src" href="https://letterboxd.com/jajuds/" target="_blank" rel="noopener">Letterboxd &nearr;</a></div>
+    <div class="lb-stats" id="lbStats"></div>
+    <div class="favs" id="lbFavs">
+      <div class="fav sk"></div><div class="fav sk"></div><div class="fav sk"></div><div class="fav sk"></div>
+    </div>
+    <h3 class="otc-sub">Recently watched</h3>
+    <div class="diary" id="lbDiary"></div>
+  </section>
+
+  <section id="music" class="otc-sec wrap" data-chapter="Music">
+    <div class="otc-head"><span class="otc-n">ii.</span><h2>Now <em>spinning</em></h2><a class="otc-src" href="https://open.spotify.com/user/31u3rokd6tiaz7ptzdy4r5fpn2ea" target="_blank" rel="noopener">Spotify &nearr;</a></div>
+    <div class="spin">
+      <div class="vinyl" id="vinyl" aria-hidden="true"><div class="vinyl-label" id="vinylArt"></div></div>
+      <div class="spin-info">
+        <div class="spin-state lcd" id="spState">on rotation</div>
+        <div class="spin-title" id="spTitle">ja&rsquo;s spotify</div>
+        <div class="spin-artist" id="spArtist">what I&rsquo;m listening to lately</div>
+        <a class="otc-btn" id="spLink" href="https://open.spotify.com/user/31u3rokd6tiaz7ptzdy4r5fpn2ea" target="_blank" rel="noopener">Listen along &nearr;</a>
+      </div>
+    </div>
+    <div class="sp-embed" id="spEmbed"></div>
+  </section>
+
+  <section id="words" class="otc-sec wrap" data-chapter="Words">
+    <div class="otc-head"><span class="otc-n">iii.</span><h2>From <em>Ja</em></h2><a class="otc-src" href="https://fromja.substack.com/" target="_blank" rel="noopener">Substack &nearr;</a></div>
+    <div class="ss-top">
+      <div class="ss-count"><b id="ssCount">&mdash;</b><span id="ssCountLabel">essays so far</span></div>
+      <p class="ss-tag">&ldquo;figuring it out as i go&rdquo;</p>
+    </div>
+    <div class="letters" id="ssPosts"></div>
+    <a class="otc-btn" href="https://fromja.substack.com/" target="_blank" rel="noopener">Read &amp; subscribe &nearr;</a>
+  </section>
+
+  <section class="otc-end wrap">
+    <a class="next-door" href="/work.html" data-dest="The Work" data-destnum="01"><span class="lcd">Back to</span><b>The Work <em>projects &amp; experience</em></b><span aria-hidden="true">&rarr;</span></a>
+  </section>
+</main>
+<footer id="siteFooter"></footer>
+<script type="module" src="/src/offline.js"></script>
+</body>
+</html>

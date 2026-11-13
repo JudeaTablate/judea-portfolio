@@ -11,7 +11,7 @@ export function initNeuralScene(canvas, container) {
   camera.position.set(0, 0, 13);
 
   const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
 
   const group = new THREE.Group();
   scene.add(group);
@@ -112,14 +112,16 @@ export function initNeuralScene(canvas, container) {
   window.addEventListener('resize', resize);
 
   let autoRotate = 0;
+  let _vis = true; new IntersectionObserver(([e]) => { _vis = e.isIntersecting; }).observe(canvas);
   function animate() {
+    requestAnimationFrame(animate);
+    if (!_vis || document.hidden) return;
     autoRotate += 0.0018;
     curRotX += (targetRotX - curRotX) * 0.04;
     curRotY += (targetRotY - curRotY) * 0.04;
     group.rotation.x = curRotX + Math.sin(autoRotate * 0.6) * 0.08;
     group.rotation.y = autoRotate + curRotY;
     renderer.render(scene, camera);
-    requestAnimationFrame(animate);
   }
   animate();
 
@@ -134,7 +136,7 @@ export function initFloatingShape(canvas, container, colorHex = 0xb983ff) {
   camera.position.set(0, 0, 6.5);
 
   const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
 
   const geo = new THREE.IcosahedronGeometry(2.1, 1);
   const wire = new THREE.WireframeGeometry(geo);
@@ -166,7 +168,10 @@ export function initFloatingShape(canvas, container, colorHex = 0xb983ff) {
   resize();
   window.addEventListener('resize', resize);
 
+  let _vis = true; new IntersectionObserver(([e]) => { _vis = e.isIntersecting; }).observe(canvas);
   function animate() {
+    requestAnimationFrame(animate);
+    if (!_vis || document.hidden) return;
     t += 0.004;
     curRotX += (targetRotX - curRotX) * 0.05;
     curRotY += (targetRotY - curRotY) * 0.05;
@@ -174,7 +179,6 @@ export function initFloatingShape(canvas, container, colorHex = 0xb983ff) {
     mesh.rotation.y = t + curRotY;
     inner.rotation.copy(mesh.rotation);
     renderer.render(scene, camera);
-    requestAnimationFrame(animate);
   }
   animate();
 
