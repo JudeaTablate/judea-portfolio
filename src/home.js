@@ -15,10 +15,11 @@ heroTitle.innerHTML = heroTitle.innerHTML.split(/(<br>)/).map((chunk) => {
 }).join('');
 
 function playHeroIntro() {
-  if (reduceMotion) { gsap.set('.hero .word', { y: '0%' }); gsap.set('.hero-sub, .hero-ctas, .hero-visual, .door', { opacity: 1 }); return; }
+  if (reduceMotion) { gsap.set('.hero .word', { y: '0%' }); gsap.set('.hero-sub, .hero-ctas, .hero-visual, .door, .award-pill', { opacity: 1 }); return; }
   gsap.timeline({ defaults: { ease: 'power4.out' } })
     .to('.hero .word', { y: '0%', duration: 1, stagger: 0.06 })
     .to('.hero-sub', { opacity: 1, duration: 0.6 }, '-=0.5')
+    .to('.award-pill', { opacity: 1, duration: 0.5 }, '-=0.45')
     .to('.hero-ctas', { opacity: 1, duration: 0.6 }, '-=0.4')
     .fromTo('.hero-visual', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.9 }, '-=0.7')
     .fromTo('.door', { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, stagger: 0.08 }, '-=0.5');
