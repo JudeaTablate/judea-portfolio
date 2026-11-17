@@ -18,9 +18,11 @@ const decode = (s = '') => s.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1').replac
 const tag = (xml, name) => { const m = xml.match(new RegExp(`<${name}[^>]*>([\\s\\S]*?)</${name}>`)); return m ? decode(m[1]) : null; };
 
 async function letterboxd() {
-  const out = { favorites: [], stats: {}, diary: [] };
+  const out = { favorites: [], stats: {}, diary: [], debug: {} };
   const [rss, profile] = await Promise.allSettled([get(`https://letterboxd.com/${LB_USER}/rss/`), get(`https://letterboxd.com/${LB_USER}/`)]);
 
+  out.debug.rss = rss.status === 'fulfilled' ? 'ok' : String(rss.reason && rss.reason.message);
+  out.debug.profile = profile.status === 'fulfilled' ? 'ok' : String(profile.reason && profile.reason.message);
   if (rss.status === 'fulfilled') {
     for (const item of rss.value.split('<item>').slice(1)) {
       const title = tag(item, 'letterboxd:filmTitle');
@@ -46,7 +48,8 @@ async function letterboxd() {
       const k = m[2].trim();
       out.stats[/^films?$/i.test(k) ? 'Films' : k.replace(/^\w/, (c) => c.toUpperCase())] = m[1];
     }
-    const i = html.search(/id="favourites"/);
+    const i = html.search(/id="favourites"|class="[^"]*favourite-films/);
+    out.debug.favouritesBlock = i > -1;
     if (i > -1) {
       const block = html.slice(i, html.indexOf('</section>', i));
       const seen = new Set();

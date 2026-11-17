@@ -497,7 +497,7 @@ footer{border-top:1px solid var(--line); padding:26px 0; }
 .blive{font-family:'JetBrains Mono'; font-size:13px; color:var(--accent3); display:flex; align-items:center; gap:6px; white-space:nowrap;}
 .blive::before{content:''; width:8px; height:8px; border-radius:50%; background:var(--accent3); animation:pulse 1.6s infinite;}
 .bview{position:relative; aspect-ratio:16/10; overflow:hidden; background:#0b0f26;}
-.bview iframe{position:absolute; top:0; left:0; width:1280px; height:800px; border:0; transform-origin:0 0; pointer-events:none; background:#fff; opacity:0; transition:opacity .5s ease;}
+.bview iframe{position:absolute; top:0; left:0; width:1280px; height:800px; max-width:none; max-height:none; border:0; transform-origin:0 0; pointer-events:none; background:#fff; opacity:0; transition:opacity .5s ease;}
 .bview.loaded iframe{opacity:1;}
 .bview .shot{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:top;}
 .proj-info{max-width:520px;}

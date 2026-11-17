@@ -6,6 +6,9 @@ export const MEDIA = {
   // Paste a Spotify playlist link here to show it as a player, e.g.
   // 'https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M'
   spotifyPlaylist: '',
-  // Used only if Letterboxd can't be reached. Format: { title, year, url }
-  favoritesFallback: [],
+  // Your four favorites, shown whenever Letterboxd can't be read live.
+  // poster is optional: right-click a poster on Letterboxd > "Copy image address".
+  favoritesFallback: [
+    // { title: 'Film Title', year: '2017', url: 'https://letterboxd.com/film/film-slug/', poster: '' },
+  ],
 };

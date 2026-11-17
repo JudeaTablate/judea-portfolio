@@ -102,7 +102,7 @@ export function initGallery(lenis, injectIcons) {
     loadPreview(i); if (i + 1 < n) loadPreview(i + 1);
   };
   setActive(0);
-  new ResizeObserver(() => document.querySelectorAll('.bview').forEach(fitFrame)).observe(track);
+  { const ro = new ResizeObserver((es) => es.forEach((e) => fitFrame(e.target))); document.querySelectorAll('.bview').forEach((v) => ro.observe(v)); }
 
   let st = null;
   const mm = gsap.matchMedia();
