@@ -1,5 +1,6 @@
 import { gsap, reduceMotion, reveals, scrollToHashSoon } from './shared.js';
 import { MEDIA } from './media-config.js';
+import { initTerminal } from './terminal.js';
 
 const $ = (id) => document.getElementById(id);
 const esc = (s = '') => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -108,3 +109,4 @@ if (!reduceMotion) {
 document.querySelectorAll('.otc-sec').forEach((s) => s.classList.add('reveal'));
 reveals();
 scrollToHashSoon();
+initTerminal();

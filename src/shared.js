@@ -43,7 +43,7 @@ header.innerHTML = `
   </div>
   <div class="navtools">
     <div id="clock" class="lcd clock" aria-label="Time in Manila">MNL --:--</div>
-    ${PAGE === 'work' ? '<button class="toolbtn icon-only" id="termBtn" aria-label="Open terminal easter egg" title="Terminal"><span class="lcd">&gt;_</span></button>' : ''}
+    ${PAGE !== 'home' ? '<button class="toolbtn icon-only" id="termBtn" aria-label="Open terminal easter egg" title="Terminal"><span class="lcd">&gt;_</span></button>' : ''}
     <div class="sound-menu" id="soundMenu">
       <button class="toolbtn" id="soundBtn" aria-haspopup="listbox" aria-expanded="false" aria-label="Choose background music"><span class="ic" data-icon="music"></span><span class="tb-label" id="soundLabel">Off</span><span class="ic ic-chev" data-icon="chevron"></span></button>
       <ul class="sound-list" id="soundList" role="listbox" aria-label="Music mood"></ul>

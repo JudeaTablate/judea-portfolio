@@ -2,7 +2,7 @@ import { gsap, ScrollTrigger, lenis, setMenuSections, bindLinks, paintHover, rev
 import { injectIcons } from './icons.js';
 import { initGallery } from './gallery.js';
 import { initFloatingShape } from './three-scene.js';
-import { nextJoke } from './jokes.js';
+import { initTerminal } from './terminal.js';
 import { mountBuddy } from './buddy.js';
 
 /* ---------- projects gallery ---------- */
@@ -147,43 +147,12 @@ document.querySelectorAll('.js-email-btn').forEach((btn) => {
   });
 });
 
-/* ---------- terminal drawer (easter egg) ---------- */
-(() => {
-  const drawer = document.getElementById('termDrawer');
-  const open = (o) => {
-    drawer.classList.toggle('open', o); drawer.setAttribute('aria-hidden', String(!o));
-    if (o) setTimeout(() => input.focus(), 250);
-  };
-  document.getElementById('termBtn')?.addEventListener('click', () => open(!drawer.classList.contains('open')));
-  document.getElementById('termClose').addEventListener('click', () => open(false));
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') open(false); });
-  const body = document.getElementById('termBody');
-  const input = document.getElementById('termInput');
-  const print = (text, cls = 'out') => { const l = document.createElement('div'); l.className = 'line ' + cls; l.textContent = text; body.appendChild(l); body.scrollTop = body.scrollHeight; };
-  const go = (id) => { open(false); lenis.scrollTo(document.getElementById(id), { offset: -70 }); };
-  const cmds = {
-    help: () => 'commands: whoami · projects · wins · skills · contact · joke · coffee · sudo hire-me · clear',
-    whoami: () => 'judea_ann_tablate — BSCS Software Engineering, FEU Tech. Full-stack + AI.',
-    projects: () => { setTimeout(() => go('work'), 500); return gallery.projects.map((p, i) => `${i + 1}) ${p.title} — ${p.sub}`).join('\n'); },
-    wins: () => { setTimeout(() => go('wins'), 500); return 'P&G Next AIdeathon 2026: 2nd Place, Next 8 (Digital PM), Social Media Challenge · Elite Academic Scholar · Dean\'s Lister'; },
-    skills: () => { setTimeout(() => go('skills'), 500); return 'Python, JS/TS, React, Node, FastAPI, PostgreSQL, Docker, GitHub Actions, LLM APIs'; },
-    contact: () => 'judeaannctablate@gmail.com · github.com/JudeaTablate',
-    coffee: () => '[ c(_) ] 74% full. ~3.5 hours of debugging left.',
-    joke: () => nextJoke(),
-    clear: () => { body.innerHTML = ''; return null; },
-  };
-  input.addEventListener('keydown', (e) => {
-    if (e.key !== 'Enter') return;
-    const raw = input.value.trim(); input.value = '';
-    print(raw, 'cmd');
-    if (!raw) return;
-    const k = raw.toLowerCase();
-    if (k === 'sudo hire-me' || k === 'sudo hire me') { print('permission granted. taking you to contact...', 'accent'); setTimeout(() => go('contact'), 700); return; }
-    const out = cmds[k] ? cmds[k]() : `command not found: ${raw}. try "help"`;
-    if (out != null) print(out, cmds[k] ? 'out' : 'accent');
-  });
-  print("judea's terminal — type 'help'");
-})();
+/* ---------- terminal (easter egg) ---------- */
+const term = initTerminal({
+  projects: () => { setTimeout(() => term.go('work'), 500); return gallery.projects.map((p, i) => `${i + 1}) ${p.title} — ${p.sub}`).join('\n'); },
+  wins: () => { setTimeout(() => term.go('wins'), 500); return "P&G Next AIdeathon 2026: 2nd Place, Next 8 (Digital PM), Social Media Challenge · Elite Academic Scholar · Dean's Lister"; },
+  skills: () => { setTimeout(() => term.go('skills'), 500); return 'Python, JS/TS, React, Node, FastAPI, PostgreSQL, Docker, GitHub Actions, LLM APIs'; },
+});
 
 paintHover();
 reveals();
