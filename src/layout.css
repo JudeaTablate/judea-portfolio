@@ -432,7 +432,7 @@ section.chapter.pad{padding:clamp(64px,10vh,110px) 28px;}
 .ws-desc{font-size:clamp(17px,1.4vw,19px); line-height:1.6; color:var(--text-dim); max-width:640px;}
 .ws-awards{list-style:none; padding:0; margin:26px 0 0; display:grid; grid-template-columns:repeat(3,1fr); gap:12px;}
 .ws-awards li{display:flex; gap:12px; align-items:flex-start; padding:16px; border-radius:16px; border:1px solid var(--line); background:color-mix(in srgb,var(--surface) 70%,transparent);}
-.ws-awards li:first-child{border-color:color-mix(in srgb,var(--accent2) 55%,var(--line)); background:linear-gradient(135deg,color-mix(in srgb,var(--accent2) 16%,var(--surface)),color-mix(in srgb,var(--surface) 70%,transparent));}
+.ws-awards li.hl{border-color:color-mix(in srgb,var(--accent2) 55%,var(--line)); background:linear-gradient(135deg,color-mix(in srgb,var(--accent2) 16%,var(--surface)),color-mix(in srgb,var(--surface) 70%,transparent));}
 .ws-awards .ic,.honor .ic{flex:none; width:28px; height:28px; color:var(--accent2); display:inline-flex;} .ws-awards .ic svg,.honor .ic svg{width:100%; height:100%;}
 .ws-awards b{display:block; font-size:17px; line-height:1.25;}
 .ws-awards span:not(.ic){display:block; font-size:14.5px; color:var(--text-dim); margin-top:3px; line-height:1.35;}
@@ -467,3 +467,13 @@ section.chapter.pad{padding:clamp(64px,10vh,110px) 28px;}
 .honors .honor-when{flex-basis:100%; margin-left:44px; text-align:left;}
 @media (max-width:1000px){ .honors{grid-template-columns:1fr;} .honors .honor-when{flex-basis:auto; margin-left:auto; text-align:right;} }
 @media (max-width:520px){ .honors .honor-when{flex-basis:100%; margin-left:44px; text-align:left;} }
+
+/* honors: date sits right under the school, no stretched gap */
+.honors .honor{display:grid; grid-template-columns:28px 1fr; column-gap:16px; row-gap:8px; align-content:start; align-items:start;}
+.honors .honor .ic{margin-top:2px;}
+.honors .honor-when,
+.honors .honor-when{grid-column:2; margin:0; text-align:left; flex-basis:auto;}
+@media (max-width:1000px){ .honors .honor-when{margin:0; text-align:left;} }
+/* highlighted award gets a little extra emphasis */
+.ws-awards li.hl{box-shadow:0 10px 30px color-mix(in srgb,var(--accent2) 18%,transparent);}
+.ws-awards li.hl .ic{color:var(--accent2);}
