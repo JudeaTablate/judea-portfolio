@@ -459,3 +459,11 @@ section.chapter.pad{padding:clamp(64px,10vh,110px) 28px;}
 .award-pill > span:last-child{color:var(--accent3);}
 @media (prefers-reduced-motion: reduce){ .ws-ring{animation:none;} .award-pill{opacity:1;} }
 @media (max-width:760px){ .ws-meta{flex-direction:column; gap:4px;} .ws-meta span+span::before{display:none;} }
+
+/* three honors: 3 across on wide screens, the text stacks so it fits */
+.honors{grid-template-columns:repeat(3,1fr);}
+.honors .honor{flex-wrap:wrap; align-items:flex-start;}
+.honors .honor > div{flex:1; min-width:0;}
+.honors .honor-when{flex-basis:100%; margin-left:44px; text-align:left;}
+@media (max-width:1000px){ .honors{grid-template-columns:1fr;} .honors .honor-when{flex-basis:auto; margin-left:auto; text-align:right;} }
+@media (max-width:520px){ .honors .honor-when{flex-basis:100%; margin-left:44px; text-align:left;} }

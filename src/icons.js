@@ -3,6 +3,7 @@ const s = (body, vb = 32) =>
   `<svg viewBox="0 0 ${vb} ${vb}" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${body}</svg>`;
 
 export const ICONS = {
+  people: s('<circle cx="12" cy="11" r="4"/><path d="M4 26v-1.5A6.5 6.5 0 0 1 10.5 18h3a6.5 6.5 0 0 1 6.5 6.5V26"/><circle cx="22.5" cy="12.5" r="3.2"/><path d="M22 18.2h1a5.5 5.5 0 0 1 5.5 5.5V26"/>'),
   trophy: s('<path d="M10 4h12v8a6 6 0 0 1-12 0V4Z"/><path d="M10 7H5v2a5 5 0 0 0 5 5M22 7h5v2a5 5 0 0 1-5 5"/><path d="M16 18v5M11 28h10M12.5 23h7l1 5h-9Z"/>'),
   medal: s('<circle cx="16" cy="19" r="7.5"/><path d="m11 4 5 8 5-8M16 15.5v7M13.5 18l2.5-2.5v7"/>'),
   star: s('<path d="m16 3.5 3.6 7.6 8.2 1-6 5.7 1.6 8.2L16 21.9l-7.4 4.1 1.6-8.2-6-5.7 8.2-1L16 3.5Z"/>'),
