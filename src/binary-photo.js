@@ -98,7 +98,7 @@ export function initBinaryPhoto(canvas, srcs, container) {
     ctx.fillRect(0, 0, W, H);
 
     // overlay: binary digits, glow-blended so the photo still reads through
-    ctx.font = `${Math.max(cellH * 0.85, 6)}px 'JetBrains Mono', monospace`;
+    ctx.font = `${Math.max(cellH * 0.85, 6)}px 'Space Mono', monospace`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.globalCompositeOperation = 'screen';

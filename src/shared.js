@@ -1,5 +1,6 @@
 import './style.css';
 import './layout.css';
+import './personal.css';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
@@ -37,7 +38,7 @@ gsap.ticker.lagSmoothing(0);
 const header = document.getElementById('siteHeader');
 header.innerHTML = `
 <nav class="topnav" aria-label="Site">
-  <a class="logo" href="/" data-dest="Home" data-destnum="00">JUDEA</a>
+  <a class="logo" href="/" data-dest="Home" data-destnum="00">judea</a>
   <div class="pagelinks">
     ${PAGES.map((p) => `<a href="${p.href}" data-dest="${p.label}" data-destnum="${p.num}" ${p.id === PAGE ? 'aria-current="page"' : ''}>${p.label}</a>`).join('')}
   </div>
