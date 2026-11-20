@@ -143,21 +143,25 @@ export function initGallery(lenis, injectIcons) {
     return () => { sec.classList.remove('is-pinned'); nav.removeEventListener('click', onNav); st = null; gsap.set(track, { clearProps: 'transform' }); bar.style.transform = ''; };
   });
   mm.add('(max-width: 860px), (max-height: 559px)', () => {
-    // touch/narrow/short screens: native swipe with scroll-snap (no scroll-jacking)
-    const onScroll = () => {
-      const i = Math.round(track.scrollLeft / (slides[0].offsetWidth + 16));
-      setActive(Math.min(n - 1, Math.max(0, i)));
-      bar.style.transform = `scaleX(${track.scrollLeft / Math.max(1, track.scrollWidth - track.clientWidth)})`;
-    };
-    track.addEventListener('scroll', onScroll, { passive: true });
-    const goTo = (i) => {
-      lenis.scrollTo(sec, { offset: -70, duration: 1 });
-      setTimeout(() => track.scrollTo({ left: slides[i].offsetLeft - slides[0].offsetLeft, behavior: 'smooth' }), 650);
-    };
+    // phones / short screens: projects stack vertically and scroll like the rest of the page
+    sec.classList.add('is-stacked');
+    const io = new IntersectionObserver((es) => {
+      es.forEach((e) => {
+        if (!e.isIntersecting) return;
+        const i = slides.indexOf(e.target);
+        if (i < 0) return;
+        setActive(i);
+        bar.style.transform = `scaleX(${(i + 1) / n})`;
+        const chip = nav.children[i];
+        if (chip) nav.scrollTo({ left: chip.offsetLeft - 18, behavior: 'smooth' });
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+    slides.forEach((s) => io.observe(s));
+    const goTo = (i) => lenis.scrollTo(slides[i], { offset: -150, duration: 1 });
     const onNav = (e) => { const b = e.target.closest('[data-go]'); if (b) goTo(+b.dataset.go); };
     nav.addEventListener('click', onNav);
     window.__goProj = goTo;
-    return () => { track.removeEventListener('scroll', onScroll); nav.removeEventListener('click', onNav); };
+    return () => { sec.classList.remove('is-stacked'); io.disconnect(); nav.removeEventListener('click', onNav); };
   });
 
   return { goTo: (i) => window.__goProj && window.__goProj(i), projects: PROJECTS };

@@ -73,3 +73,62 @@
 @media (max-width:560px){ .footbar{flex-direction:column; gap:18px; align-items:flex-start;} .foot-socials{margin-left:0; gap:24px;} }
 #siteFooter .footbar{display:flex; justify-content:space-between; align-items:center;} #siteFooter .foot-socials{margin-left:auto;} @media (max-width:560px){ #siteFooter .footbar{flex-direction:column; align-items:flex-start;} #siteFooter .foot-socials{margin-left:0;} }
 #siteFooter .foot-socials{margin:0 0 0 auto; max-width:none; width:auto; padding:0; justify-content:flex-end; position:static; background:none; border:0; height:auto;} @media (max-width:560px){ #siteFooter .foot-socials{margin:0;} }
+
+/* ================= MOBILE HARDENING ================= */
+/* never let anything make the page wider than the screen (that is what zooms phones out) */
+html, body{max-width:100%; overflow-x:clip;}
+img, video, canvas, iframe{max-width:100%;}
+#loader{overflow:hidden;}
+#loader .ld-content{box-sizing:border-box; width:100%;}
+@media (max-width:600px){
+  .ld-svg{width:88vw;}
+  .ld-sub{flex-direction:row !important; flex-wrap:wrap; justify-content:center; gap:4px 10px !important; letter-spacing:.14em !important; font-size:12.5px !important; padding:0 12px;}
+  .ld-sub i{display:inline-block !important; width:4px !important; height:4px !important;}
+  .ld-top, .ld-bottom{font-size:12px !important; letter-spacing:2px !important;}
+}
+
+/* projects on phones: one card after another, normal vertical scroll */
+@media (max-width:860px), (max-height:559px){
+  .work-sec.is-stacked .work-pin{padding:56px 0 24px;}
+  .work-sec.is-stacked .work-head{position:sticky; top:var(--hdr); z-index:20; background:color-mix(in srgb,var(--bg) 92%,transparent); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); padding-top:10px; padding-bottom:4px;}
+  .work-sec.is-stacked .work-head .ch-head{display:none;}
+  .work-sec.is-stacked .work-nav{margin:0; padding:2px 0 8px;}
+  .work-sec.is-stacked .work-nav button{font-size:14px; padding:8px 14px; min-height:40px;}
+  .work-sec.is-stacked .work-progress{margin-top:0;}
+  .work-sec.is-stacked .work-viewport{overflow:visible; display:block;}
+  .work-sec.is-stacked .work-track{display:flex; flex-direction:column; width:100%; max-width:100%; overflow:visible; scroll-snap-type:none; gap:56px; padding:28px 18px 10px; transform:none !important;}
+  .work-sec.is-stacked .proj{width:100%; max-width:560px; margin:0 auto; display:flex; flex-direction:column; gap:18px; padding:0; scroll-snap-align:none;}
+  .work-sec.is-stacked .bframe{width:100%; max-width:none;}
+  .work-sec.is-stacked .proj-num{font-size:52px;}
+  .work-sec.is-stacked .proj-info h3{font-size:34px;}
+  .work-sec.is-stacked .proj-info p{font-size:16.5px; -webkit-line-clamp:unset; display:block;}
+  .work-sec.is-stacked .proj + .proj{border-top:1px solid var(--line); padding-top:40px;}
+  /* show the chapter title once, above the sticky chips */
+  .work-sec.is-stacked::before{content:'01 / Things I\\2019ve built'; display:block; padding:40px 18px 0; font:400 34px var(--f-display); color:var(--text);}
+}
+
+/* small-screen polish everywhere */
+@media (max-width:600px){
+  .where-pill{padding:8px 14px 8px 10px; min-height:40px; font-size:14px; bottom:max(12px,env(safe-area-inset-bottom));}
+  .where-pill .wp-num{font-size:11px;}
+  .eyebrow{letter-spacing:1.5px; font-size:12.5px;}
+  .home h1{font-size:clamp(44px,12.5vw,60px);}
+  .ws-num{font-size:96px !important;}
+  .ws-title{font-size:32px !important;}
+  .ch-title{font-size:30px !important;}
+  .page-title{font-size:clamp(44px,14vw,64px) !important;}
+  .honors .honor{padding:18px;}
+  .cert-grid{grid-template-columns:1fr !important;}
+  .otc-title{font-size:clamp(56px,18vw,96px) !important;}
+  .favs{gap:14px;}
+  .diary{grid-template-columns:1fr !important;}
+  .dia{grid-template-columns:44px 1fr auto;}
+  .term-drawer .term-body{height:200px;}
+}
+@media (max-width:860px), (max-height:559px){
+  .work-sec.is-stacked .proj, .work-sec.is-stacked .proj-info{overflow:visible !important; max-height:none !important; height:auto !important;}
+  .work-sec.is-stacked .proj > *{min-width:0; max-width:100%;}
+  .work-sec.is-stacked .bframe{box-sizing:border-box; width:100% !important; margin:0;}
+  .work-sec.is-stacked .work-links{flex-direction:column; gap:12px; padding-bottom:4px;}
+  .work-sec.is-stacked .work-links > *{width:100%; justify-content:center;}
+}
