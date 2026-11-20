@@ -1,139 +1,141 @@
-// Renders the real photo in its actual colors, with a grid of binary digits
-// (0/1) layered on top as a glowing HUD-style overlay — density/placement
-// follows the image's brightness map, so the numbers trace the photo's
-// contours without hiding who it is. Idle: gentle flicker. Hover: faster,
-// more active digit movement.
+// "AI vision" portrait: the photo stays clean; a face-tracking box with a
+// label + confidence score sits AROUND the face (never on it). Hover/tap swaps
+// to the jolly photo, the box glides to the new face and a scan line sweeps down.
+// (File name kept so imports don't change.)
+
+// face boxes as fractions of the ORIGINAL image (x, y, w, h)
+const FACES = [
+  { x: 0.32, y: 0.085, w: 0.29, h: 0.29, label: 'judea', tag: 'mood: unbothered', conf: 98.7 },
+  { x: 0.43, y: 0.085, w: 0.29, h: 0.29, label: 'judea', tag: 'mood: jolly', conf: 99.4 },
+];
+
 export function initBinaryPhoto(canvas, srcs, container) {
-  // srcs = [defaultPhoto, hoverPhoto]; hover (or tap) crossfades to the second one
-  const [srcA, srcB] = Array.isArray(srcs) ? srcs : [srcs, srcs];
   const ctx = canvas.getContext('2d');
-  const COLS = 34;
-  let ROWS = 36;
-  let cellW, cellH, W, H;
-  let brightness = [];
-  let chars = [];
-  let phase = [];
-  let hovered = false;
-
-  const img = new Image();
-  const imgB = new Image();
-  let mix = 0, readyB = false;
-  img.src = srcA;
+  const [srcA, srcB] = Array.isArray(srcs) ? srcs : [srcs, srcs];
+  const imgA = new Image(), imgB = new Image();
+  let readyA = false, readyB = false;
+  imgA.onload = () => { readyA = true; resize(); };
   imgB.onload = () => { readyB = true; };
-  imgB.src = srcB;
+  imgA.src = srcA; imgB.src = srcB;
 
-  function buildBrightnessGrid() {
-    const off = document.createElement('canvas');
-    off.width = COLS;
-    ROWS = Math.round(COLS * (img.naturalHeight / img.naturalWidth)) || 36;
-    off.height = ROWS;
-    const octx = off.getContext('2d');
-    octx.drawImage(img, 0, 0, COLS, ROWS);
-    const data = octx.getImageData(0, 0, COLS, ROWS).data;
-    brightness = [];
-    chars = [];
-    phase = [];
-    for (let y = 0; y < ROWS; y++) {
-      for (let x = 0; x < COLS; x++) {
-        const i = (y * COLS + x) * 4;
-        const r = data[i], g = data[i + 1], b = data[i + 2];
-        const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-        brightness.push(lum);
-        chars.push(Math.random() > 0.5 ? '1' : '0');
-        phase.push(Math.random() * 1000);
-      }
-    }
-  }
-
+  let W = 0, H = 0, dpr = 1;
   function resize() {
-    const w = container.clientWidth || 200;
-    const h = container.clientHeight || 260;
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = w * dpr;
-    canvas.height = h * dpr;
-    canvas.style.width = w + 'px';
-    canvas.style.height = h + 'px';
+    const r = canvas.getBoundingClientRect();
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = Math.max(1, r.width); H = Math.max(1, r.height);
+    canvas.width = W * dpr; canvas.height = H * dpr;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    W = w; H = h;
-    cellW = W / COLS;
-    cellH = H / ROWS;
   }
+  new ResizeObserver(resize).observe(canvas);
 
+  let hovered = false, tapT;
   container.addEventListener('mouseenter', () => { hovered = true; });
   container.addEventListener('mouseleave', () => { hovered = false; });
-  let tapT;
-  container.addEventListener('touchstart', () => { hovered = true; clearTimeout(tapT); tapT = setTimeout(() => { hovered = false; }, 1800); }, { passive: true });
+  container.addEventListener('touchstart', () => { hovered = true; clearTimeout(tapT); tapT = setTimeout(() => { hovered = false; }, 2200); }, { passive: true });
 
-  // draw the real photo, covering the canvas (object-fit: cover behavior)
-  function drawPhotoCover(im, alpha = 1) {
-    const iw = im.naturalWidth, ih = im.naturalHeight;
-    const canvasRatio = W / H, imgRatio = iw / ih;
+  // object-fit: cover mapping (image fraction -> canvas px)
+  function coverRect(im) {
+    const iw = im.naturalWidth, ih = im.naturalHeight, cr = W / H, ir = iw / ih;
     let sx, sy, sw, sh;
-    if (imgRatio > canvasRatio) {
-      sh = ih; sw = ih * canvasRatio; sx = (iw - sw) / 2; sy = 0;
-    } else {
-      sw = iw; sh = iw / canvasRatio; sx = 0; sy = (ih - sh) / 2;
-    }
-    ctx.globalAlpha = alpha;
-    ctx.drawImage(im, sx, sy, sw, sh, 0, 0, W, H);
-    ctx.globalAlpha = 1;
+    if (ir > cr) { sh = ih; sw = ih * cr; sx = (iw - sw) / 2; sy = 0; }
+    else { sw = iw; sh = iw / cr; sx = 0; sy = (ih - sh) / 2; }
+    return { sx, sy, sw, sh, iw, ih };
   }
+  const mapBox = (f, c) => ({
+    x: ((f.x * c.iw - c.sx) / c.sw) * W, y: ((f.y * c.ih - c.sy) / c.sh) * H,
+    w: ((f.w * c.iw) / c.sw) * W, h: ((f.h * c.ih) / c.sh) * H,
+  });
+  const drawPhoto = (im, a) => { const c = coverRect(im); ctx.globalAlpha = a; ctx.drawImage(im, c.sx, c.sy, c.sw, c.sh, 0, 0, W, H); ctx.globalAlpha = 1; };
 
-  let t = 0, c1, c2, c3, vis = true, last = 0;
-  const readColors = () => { const s = getComputedStyle(document.body); c1 = s.getPropertyValue('--accent3').trim() || '#6ff0e0'; c2 = s.getPropertyValue('--accent2').trim() || '#ff9ecd'; c3 = s.getPropertyValue('--accent').trim() || '#b983ff'; };
+  let cA = '#6ff0e0', cB = '#ff9ecd';
+  const readColors = () => { const s = getComputedStyle(document.body); cA = s.getPropertyValue('--accent3').trim() || cA; cB = s.getPropertyValue('--accent2').trim() || cB; };
   readColors();
   new MutationObserver(readColors).observe(document.body, { attributes: true, attributeFilter: ['data-theme'] });
+
+  let vis = true;
   new IntersectionObserver(([e]) => { vis = e.isIntersecting; }).observe(canvas);
-  function frame(now = 0) {
-    if (!vis || document.hidden || now - last < 33) { requestAnimationFrame(frame); return; }
-    last = now;
-    t += 2;
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    // base layer: the real photo, true colors
-    mix += ((hovered && readyB ? 1 : 0) - mix) * 0.12;
-    drawPhotoCover(img, 1);
-    if (mix > 0.01) drawPhotoCover(imgB, mix);
-    // subtle dark scrim so digits stay legible over any photo
-    ctx.fillStyle = 'rgba(5,8,20,0.28)';
-    ctx.fillRect(0, 0, W, H);
+  let mix = 0, scan = -1, wasHover = false, box = null, conf = FACES[0].conf, t0 = performance.now();
 
-    // overlay: binary digits, glow-blended so the photo still reads through
-    ctx.font = `${Math.max(cellH * 0.85, 6)}px 'Space Mono', monospace`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.globalCompositeOperation = 'screen';
-
-    const flipChance = hovered ? 0.05 : 0.012;
-    const speed = hovered ? 1 : 0.35;
-
-    for (let y = 0; y < ROWS; y++) {
-      for (let x = 0; x < COLS; x++) {
-        const idx = y * COLS + x;
-        const lum = brightness[idx] ?? 0.5;
-        if (Math.random() < flipChance) chars[idx] = Math.random() > 0.5 ? '1' : '0';
-
-        const wobble = Math.sin((t + phase[idx]) * 0.02 * speed) * (hovered ? 3 : 0.8);
-        const px = x * cellW + cellW / 2;
-        const py = y * cellH + cellH / 2 + wobble;
-
-        // brighter image areas get brighter/more visible digits (edge/detail emphasis)
-        const alpha = hovered ? 0.5 + lum * 0.4 : 0.22 + lum * 0.28;
-        ctx.fillStyle = (idx % 11 === 0) ? c2 : (idx % 5 === 0) ? c3 : c1;
-        ctx.globalAlpha = Math.min(1, alpha);
-        ctx.fillText(chars[idx], px, py);
-      }
-    }
-    ctx.globalAlpha = 1;
-    ctx.globalCompositeOperation = 'source-over';
-    requestAnimationFrame(frame);
+  function bracket(x, y, w, h, len, col) {
+    ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(x, y + len); ctx.lineTo(x, y); ctx.lineTo(x + len, y);
+    ctx.moveTo(x + w - len, y); ctx.lineTo(x + w, y); ctx.lineTo(x + w, y + len);
+    ctx.moveTo(x + w, y + h - len); ctx.lineTo(x + w, y + h); ctx.lineTo(x + w - len, y + h);
+    ctx.moveTo(x + len, y + h); ctx.lineTo(x, y + h); ctx.lineTo(x, y + h - len);
+    ctx.stroke();
+  }
+  function pill(text, x, y, bg, fg) {
+    ctx.font = `600 ${Math.max(10, W * 0.03)}px 'JetBrains Mono', monospace`;
+    const pw = ctx.measureText(text).width + 12, ph = Math.max(16, W * 0.05);
+    ctx.fillStyle = bg; ctx.beginPath(); ctx.roundRect(x, y - ph, pw, ph, 4); ctx.fill();
+    ctx.fillStyle = fg; ctx.textBaseline = 'middle'; ctx.fillText(text, x + 6, y - ph / 2 + 0.5);
+    return ph;
   }
 
-  img.onload = () => {
-    buildBrightnessGrid();
-    resize();
-    frame();
-  };
-  window.addEventListener('resize', () => {
-    resize();
-  });
+  function frame(now) {
+    requestAnimationFrame(frame);
+    if (!vis || document.hidden || !readyA || !W) return;
+    const t = (now - t0) / 1000;
+    ctx.clearRect(0, 0, W, H);
+
+    mix += ((hovered && readyB ? 1 : 0) - mix) * 0.12;
+    drawPhoto(imgA, 1);
+    if (mix > 0.01 && readyB) drawPhoto(imgB, mix);
+
+    // faint scanlines: texture only, never hides the photo
+    ctx.fillStyle = 'rgba(10,14,39,0.06)';
+    for (let y = 0; y < H; y += 3) ctx.fillRect(0, y, W, 1);
+
+    // target face box glides between photos
+    const ca = coverRect(imgA);
+    const a = mapBox(FACES[0], ca), b = mapBox(FACES[1], readyB ? coverRect(imgB) : ca);
+    const target = { x: a.x + (b.x - a.x) * mix, y: a.y + (b.y - a.y) * mix, w: a.w + (b.w - a.w) * mix, h: a.h + (b.h - a.h) * mix };
+    if (!box) box = { ...target };
+    for (const k of ['x', 'y', 'w', 'h']) box[k] += (target[k] - box[k]) * 0.18;
+    // tiny "tracking" jitter
+    const j = reduce ? 0 : Math.sin(t * 2.3) * 0.8;
+    const pad = box.w * 0.08, bx = box.x - pad + j, by = box.y - pad, bw = box.w + pad * 2, bh = box.h + pad * 2;
+
+    const col = mix > 0.5 ? cB : cA;
+    bracket(bx, by, bw, bh, Math.min(bw, bh) * 0.22, col);
+    // tiny centre-of-face crosshair on the cheek line, offset so it isn't on the eyes
+    ctx.globalAlpha = 0.55; ctx.strokeStyle = col; ctx.lineWidth = 1;
+    const cx = bx + bw + 8, cy = by + bh * 0.5;
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + 14, cy); ctx.stroke(); ctx.globalAlpha = 1;
+
+    // label above the box
+    const f = mix > 0.5 ? FACES[1] : FACES[0];
+    conf += (f.conf + (reduce ? 0 : Math.sin(t * 3) * 0.2) - conf) * 0.1;
+    const ph = pill(`${f.label} · ${conf.toFixed(1)}%`, bx, by - 6, col, '#0A0E27');
+    ctx.font = `500 ${Math.max(9.5, W * 0.027)}px 'JetBrains Mono', monospace`;
+    ctx.fillStyle = 'rgba(255,255,255,.92)'; ctx.shadowColor = 'rgba(0,0,0,.5)'; ctx.shadowBlur = 4;
+    ctx.fillText(f.tag, bx, by + bh + 12);
+    ctx.shadowBlur = 0;
+
+    // scan sweep when hover starts
+    if (hovered && !wasHover) scan = 0;
+    wasHover = hovered;
+    if (scan >= 0 && !reduce) {
+      scan += 0.022;
+      const sy = scan * H;
+      const g = ctx.createLinearGradient(0, sy - 40, 0, sy);
+      g.addColorStop(0, 'rgba(255,158,205,0)'); g.addColorStop(1, 'rgba(255,158,205,.28)');
+      ctx.fillStyle = g; ctx.fillRect(0, sy - 40, W, 40);
+      ctx.fillStyle = cB; ctx.fillRect(0, sy - 1, W, 2);
+      if (scan > 1) scan = -1;
+    }
+
+    // corner HUD
+    ctx.font = `500 ${Math.max(9, W * 0.025)}px 'JetBrains Mono', monospace`;
+    ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.shadowColor = 'rgba(0,0,0,.45)'; ctx.shadowBlur = 4;
+    const blink = Math.floor(t * 1.6) % 2 === 0;
+    ctx.fillText((blink ? '● ' : '  ') + 'REC · cam_01', 10, H - 14);
+    const right = hovered ? 'scan: complete' : 'tracking…';
+    ctx.fillText(right, W - ctx.measureText(right).width - 10, H - 14);
+    ctx.shadowBlur = 0;
+  }
+  requestAnimationFrame(frame);
 }
