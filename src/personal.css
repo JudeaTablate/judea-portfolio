@@ -57,3 +57,19 @@
 .cert-card h4, .work-body h3, .tech-cat-label, .exp-org, .mini-card h4{font-family:'Bricolage Grotesque', system-ui, sans-serif !important; font-weight:600;}
 /* Off the Clock already uses the serif token: point it at the same face */
 :root{--serif:var(--f-display);}
+
+/* ---------- footer socials: bare logos, gradient on hover ---------- */
+.foot-brand{font-family:var(--f-logo); font-size:22px; text-transform:none; letter-spacing:0;}
+.foot-socials{display:flex; gap:26px; flex-wrap:wrap; align-items:center; margin-left:auto;}
+.soc{position:relative; display:inline-flex; color:var(--text-dim); transition:transform .3s cubic-bezier(.2,.8,.2,1), color .25s;}
+.soc svg{width:26px; height:26px; fill:currentColor; transition:fill .25s, stroke .25s;}
+.soc svg[fill="none"]{fill:none; stroke:currentColor;}
+.soc:hover, .soc:focus-visible{transform:translateY(-4px) rotate(-8deg);}
+.soc:hover svg:not([fill="none"]), .soc:focus-visible svg:not([fill="none"]){fill:url(#socGrad);}
+.soc:hover svg[fill="none"], .soc:focus-visible svg[fill="none"]{stroke:url(#socGrad);}
+.soc::after{content:attr(data-tip); position:absolute; bottom:calc(100% + 10px); left:50%; transform:translate(-50%,6px) rotate(8deg); white-space:nowrap;
+  font:600 22px var(--f-hand); color:var(--accent2); opacity:0; pointer-events:none; transition:opacity .2s, transform .25s;}
+.soc:hover::after, .soc:focus-visible::after{opacity:1; transform:translate(-50%,0) rotate(8deg);}
+@media (max-width:560px){ .footbar{flex-direction:column; gap:18px; align-items:flex-start;} .foot-socials{margin-left:0; gap:24px;} }
+#siteFooter .footbar{display:flex; justify-content:space-between; align-items:center;} #siteFooter .foot-socials{margin-left:auto;} @media (max-width:560px){ #siteFooter .footbar{flex-direction:column; align-items:flex-start;} #siteFooter .foot-socials{margin-left:0;} }
+#siteFooter .foot-socials{margin:0 0 0 auto; max-width:none; width:auto; padding:0; justify-content:flex-end; position:static; background:none; border:0; height:auto;} @media (max-width:560px){ #siteFooter .foot-socials{margin:0;} }

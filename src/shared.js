@@ -7,6 +7,7 @@ import Lenis from 'lenis';
 import { ICONS, injectIcons } from './icons.js';
 import { PALETTES, setPalette, clickSound, isOn } from './audio.js';
 import { themeTransition } from './theme-fx.js';
+import { SOCIAL_PATHS } from './social-icons.js';
 
 gsap.registerPlugin(ScrollTrigger);
 export { gsap, ScrollTrigger };
@@ -55,17 +56,22 @@ header.innerHTML = `
 </nav>`;
 
 const footer = document.getElementById('siteFooter');
+const fIcon = (d) => `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="${d}"/></svg>`;
+const SOCIALS = [
+  ['Email', 'mailto:judeaannctablate@gmail.com', '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/></svg>'],
+  ['GitHub', 'https://github.com/JudeaTablate', fIcon(SOCIAL_PATHS.github)],
+  ['LinkedIn', 'https://www.linkedin.com/in/judea-ann-tablate-65a8901b7/', '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill-rule="evenodd" d="M5 2.5h14A2.5 2.5 0 0 1 21.5 5v14a2.5 2.5 0 0 1-2.5 2.5H5A2.5 2.5 0 0 1 2.5 19V5A2.5 2.5 0 0 1 5 2.5zm1.6 7.3v8h2.5v-8zm1.25-4.1a1.45 1.45 0 1 0 0 2.9 1.45 1.45 0 0 0 0-2.9zM10.7 9.8v8h2.5v-4.2c0-1.1.2-2.2 1.6-2.2 1.4 0 1.4 1.3 1.4 2.3v4.1h2.5v-4.6c0-2.3-.5-3.6-3-3.6-1.2 0-2 .6-2.4 1.3h-.04V9.8z"/></svg>'],
+  ['Instagram', 'https://www.instagram.com/ja_tubs', fIcon(SOCIAL_PATHS.instagram)],
+  ['Letterboxd', 'https://letterboxd.com/jajuds/', fIcon(SOCIAL_PATHS.letterboxd)],
+  ['Substack', 'https://fromja.substack.com/', fIcon(SOCIAL_PATHS.substack)],
+];
 if (footer) footer.innerHTML = `
 <div class="wrap footbar">
-  <div class="foot-brand">JUDEA &copy; ${new Date().getFullYear()}</div>
-  <div class="foot-links">
-    <a href="mailto:judeaannctablate@gmail.com">Email</a>
-    <a href="https://github.com/JudeaTablate" target="_blank" rel="noopener">GitHub</a>
-    <a href="https://www.linkedin.com/in/judea-ann-tablate-65a8901b7/" target="_blank" rel="noopener">LinkedIn</a>
-    <a href="https://www.instagram.com/ja_tubs" target="_blank" rel="noopener">Instagram</a>
-    <a href="https://letterboxd.com/jajuds/" target="_blank" rel="noopener">Letterboxd</a>
-    <a href="https://fromja.substack.com/" target="_blank" rel="noopener">Substack</a>
-  </div>
+  <div class="foot-brand">judea &copy; ${new Date().getFullYear()}</div>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="socGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b983ff"/><stop offset=".5" stop-color="#ff9ecd"/><stop offset="1" stop-color="#6ff0e0"/></linearGradient></defs></svg>
+  <nav class="foot-socials" aria-label="Find me elsewhere">
+    ${SOCIALS.map(([name, href, svg]) => `<a class="soc" href="${href}" ${href.startsWith('http') ? 'target="_blank" rel="noopener"' : ''} aria-label="${name}" data-tip="${name}">${svg}</a>`).join('')}
+  </nav>
 </div>`;
 
 /* ---------- mobile menu (pages + optional section list) ---------- */
