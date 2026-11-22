@@ -42,6 +42,7 @@ This is the source for my personal portfolio site — a dark, motion-heavy site 
 
 - AI Agents & Python Machine Learning — *TestDome*
 - IT Specialist - Python — *Pearson*
+- HTML — *Sololearn*
 - Preparing for Your Associate Cloud Engineer Journey — *DataCamp*
 - Getting Started with Cisco Packet Tracer — *Cisco Networking Academy*
 - PMI Project Management Ready — *PMI*

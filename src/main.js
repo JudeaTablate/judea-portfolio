@@ -279,7 +279,7 @@ gsap.utils.toArray('.exp-row').forEach((row, i) => {
 (function () {
   // Slugs confirmed to exist in Simple Icons. Others (TestDome, Pearson, IPOPHL, PMI)
   // don't have logos in this open icon library, so they fall back to a clean initials badge.
-  const HAS_ICON = new Set(['cisco', 'datacamp']);
+  const HAS_ICON = new Set(['cisco', 'datacamp', 'sololearn']);
   document.querySelectorAll('.cert-badge[data-issuer-slug]').forEach((badge) => {
     const slug = badge.getAttribute('data-issuer-slug');
     const issuerText = badge.closest('.cert-card')?.querySelector('.cert-issuer')?.textContent || '?';
