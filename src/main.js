@@ -417,7 +417,7 @@ document.querySelectorAll('.sec-title').forEach((title) => {
     skills: () => 'Frontend: HTML/CSS/JS, Vite. Backend: Python, Node.js. AI/ML: applied AI/ML (learning), LLM APIs. DevOps: Docker, GitHub Actions, Vercel, Google Cloud. Tools: GitHub, VS Code, Cisco Packet Tracer.',
     projects: () => '1) PsyClick — clinical psychomotor screening (thesis, team ByteMe) — Lead Researcher & Documentation Specialist\n2) Sentinel — health monitoring → real-time Discord alerts\n3) Automated Cloud Backup System — Python + GitHub Actions → Google Drive',
     experience: () => 'Discipline Unit, FEUTech (Student Assistant) · FEU Tech Library (Student Assistant) · Student Coordinating Council (Exec Secretary) · ACM (Assoc. Director, Logistics) · JPCS, SCC & ACM (Jr. Officer, Logistics)',
-    contact: () => 'judeaannctablate@gmail.com · +63 908 728 8413 · github.com/JudeaTablate · linkedin.com/in/judea-ann-tablate-65a8901b7',
+    contact: () => 'judeaannctablate@gmail.com · github.com/JudeaTablate · linkedin.com/in/judea-ann-tablate-65a8901b7',
     coffee: () => '[ c(_) ] status: 74% full. sufficient for approximately 3.5 more hours of debugging.',
     joke: () => nextJoke(),
     clear: () => { body.innerHTML = ''; return null; },
