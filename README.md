@@ -45,6 +45,7 @@ This is the source for my personal portfolio site — a dark, motion-heavy site 
 - HTML — *Sololearn*
 - Preparing for Your Associate Cloud Engineer Journey — *DataCamp*
 - Getting Started with Cisco Packet Tracer — *Cisco Networking Academy*
+- Junior Cybersecurity Analyst Career Path & Introduction to Cybersecurity — *Cisco*
 - PMI Project Management Ready — *PMI*
 - Foundation Course on IP and New Product Development — *IPOPHL*
 

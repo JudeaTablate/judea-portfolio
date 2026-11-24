@@ -114,7 +114,7 @@ tabs(document.querySelector('#certificates .chips'), (b) => {
   gsap.fromTo(shown, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.3, stagger: 0.03 });
 });
 (() => {
-  const HAS_ICON = new Set(['cisco', 'datacamp']);
+  const HAS_ICON = new Set(['cisco', 'datacamp', 'sololearn']);
   document.querySelectorAll('.cert-badge[data-issuer-slug]').forEach((badge) => {
     const slug = badge.dataset.issuerSlug;
     const issuer = badge.closest('.cert-card')?.querySelector('.cert-issuer')?.textContent || '?';
