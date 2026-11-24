@@ -59,8 +59,8 @@ const TECH = {
   frontend: [['JavaScript', 'javascript'], ['TypeScript', 'typescript'], ['React', 'react'], ['Next.js', 'nextdotjs'], ['HTML', 'html5'], ['CSS', 'css'], ['Vite', 'vite']],
   backend: [['Node.js', 'nodedotjs'], ['Python', 'python'], ['Java', 'openjdk'], ['PHP', 'php'], ['FastAPI', 'fastapi'], ['PostgreSQL', 'postgresql'], ['MySQL', 'mysql'], ['C++', 'cplusplus'], ['MongoDB', 'mongodb'], ['Discord API', 'discord'], ['Google Drive API', 'googledrive']],
   devops: [['GitHub Actions', 'githubactions'], ['GitLab CI', 'gitlab'], ['Docker', 'docker'], ['Kubernetes', 'kubernetes'], ['Vercel', 'vercel']],
-  ai: [['TensorFlow', 'tensorflow'], ['PyTorch', 'pytorch'], ['OpenAI', 'openai'], ['Anthropic', 'anthropic'], ['AutoGPT', 'autogpt'], ['Claude Code', 'claude'], ['Codex', null], ['Copilot', 'githubcopilot']],
-  devtools: [['Git', 'git'], ['GitHub', 'github'], ['GitLab', 'gitlab'], ['VS Code', 'visualstudiocode'], ['Visual Studio', 'visualstudio'], ['IntelliJ IDEA', 'intellijidea'], ['PyCharm', 'pycharm'], ['MATLAB', null], ['SAP S/4HANA', 'sap'], ['Discord', 'discord'], ['Teams', 'microsoftteams'], ['Orca', null], ['Cisco Packet Tracer', 'cisco']],
+  ai: [['TensorFlow', 'tensorflow'], ['PyTorch', 'pytorch'], ['OpenAI', 'openai'], ['Anthropic', 'anthropic'], ['AutoGPT', 'autogpt'], ['Claude Code', 'claude'], ['Codex', null], ['Orca', null], ['Copilot', 'githubcopilot']],
+  devtools: [['Git', 'git'], ['GitHub', 'github'], ['GitLab', 'gitlab'], ['VS Code', 'visualstudiocode'], ['Visual Studio', 'visualstudio'], ['IntelliJ IDEA', 'intellijidea'], ['PyCharm', 'pycharm'], ['MATLAB', null], ['SAP S/4HANA', 'sap'], ['Discord', 'discord'], ['Teams', 'microsoftteams'],['Cisco Packet Tracer', 'cisco']],
 };
 document.querySelectorAll('.tech-grid').forEach((grid) => {
   (TECH[grid.dataset.cat] || []).forEach(([name, slug]) => {
