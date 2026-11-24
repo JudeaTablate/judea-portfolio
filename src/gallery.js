@@ -14,10 +14,10 @@ const PROJECTS = [
   { slug: 'splitbill', title: 'Splitbill.live', sub: 'Real-time bill splitting', kicker: 'Node.js · Express · WebSockets',
     desc: 'A shared bill-splitting tool where totals sync live for everyone as items get added, with no app or account required. Handles tax, tip, and multiple currencies automatically, ready to hand off via Venmo or GCash.',
     tags: ['Real-Time Sync', 'Multi-Currency'], live: 'https://splitbill-5ulc.onrender.com' },
-  { slug: 'backup', title: 'Automated Cloud Backup', sub: 'Python + GitHub Actions', kicker: 'Python · GitHub Actions · Google Drive API',
-    desc: 'A scheduled Python tool wired into GitHub Actions that syncs files straight to Google Drive, with credentials locked down via GitHub Secrets. Removes the "did I back that up" anxiety entirely.',
+  { slug: 'backup', title: 'Automated Cloud Backup', sub: 'Python + GitHub Actions', kicker: 'Python · GitHub Actions · rclone',
+    desc: 'A weekly GitHub Actions job that zips the repo with Python and uploads a timestamped archive to Google Drive through rclone, with the rclone config kept in GitHub Secrets. It runs every Sunday or on demand.',
     tags: ['Automation', 'Cloud'], code: 'https://github.com/JudeaTablate/cloud-auto-backup' },
-  { slug: 'wine', title: 'Wine About It', sub: 'Wine basics, no snobbery', kicker: 'React · Vite · Three.js · GSAP · Gemini API',
+  { slug: 'wine', title: 'Wine About It', sub: 'Wine basics, no snobbery', kicker: 'React · Vite · Three.js · Gemini API',
     desc: 'A front-end site that teaches wine basics without the snobbery, with varietals, tasting notes, and pairings in plain language. Built with React and Vite, with an AI assistant powered by the Gemini API.',
     tags: ['Content Site', 'React', 'AI'], live: 'https://wine-about-it.vercel.app/' },
 ];
@@ -28,7 +28,7 @@ const MOCKS = {
   secondsense: `<div class="mk mk-sec"><div class="mk-h">Second Sense <small>session monitor</small></div><div class="mk-cols"><div class="mk-card mk-gauge"><svg viewBox="0 0 120 70"><path d="M10 62a50 50 0 0 1 100 0" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="10" stroke-linecap="round"/><path d="M10 62a50 50 0 0 1 72-45" fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round"/></svg><strong>risk 0.18</strong></div><div class="mk-card"><h5>Behavior baseline</h5><i style="width:88%"></i><i style="width:61%"></i><i style="width:74%"></i></div></div><div class="mk-alert">identity match: stable</div></div>`,
   sentinel: `<div class="mk mk-sen"><div class="mk-h">Sentinel <small>status</small></div><div class="mk-list">${row('api.prod', 'up', '112ms')}${row('db.primary', 'up', '38ms')}${row('worker-02', 'down', '--')}${row('cdn.edge', 'up', '64ms')}</div><div class="mk-alert">#alerts: worker-02 is down, notified on-call</div></div>`,
   splitbill: `<div class="mk mk-split"><div class="mk-h">Splitbill.live <small>room: dinner-night</small></div><div class="mk-list">${row('Pasta', 'Ana', '$14.00')}${row('Salad', 'Ja', '$9.50')}${row('Drinks', 'all', '$21.00')}</div><div class="mk-total"><span>Tax + tip</span><b>$44.50 total</b></div><div class="mk-btn">Pay via GCash</div></div>`,
-  backup: `<div class="mk mk-bak"><div class="mk-h">backup.yml <small>GitHub Actions</small></div><pre>on:\n  schedule:\n    - cron: "0 2 * * *"\njobs:\n  sync:\n    steps:\n      - run: python backup.py\n        env:\n          DRIVE_KEY: \${{ secrets.DRIVE_KEY }}\n\n✓ 214 files synced to Google Drive</pre></div>`,
+  backup: `<div class="mk mk-bak"><div class="mk-h">backup.yml <small>GitHub Actions</small></div><pre>on:\n  workflow_dispatch:\n  schedule:\n    - cron: '0 0 * * 0'  # Sundays\njobs:\n  backup-job:\n    steps:\n      - uses: AnimMouse/setup-rclone@v1\n        with:\n          rclone_config: \${{ secrets.RCLONE_CONFIG }}\n      - run: python backup.py\n\n🎉 Backup uploaded to Google Drive.</pre></div>`,
   wine: `<div class="mk mk-wine"><div class="mk-h">Wine About It</div><div class="mk-hero"><div class="glass"></div><div><h4>Wine, minus the snobbery.</h4><p>Varietals, notes, pairings.</p></div></div><div class="mk-cols"><div class="mk-card"><h5>Merlot</h5></div><div class="mk-card"><h5>Riesling</h5></div><div class="mk-card"><h5>Rosé</h5></div></div></div>`,
 };
 
