@@ -102,6 +102,23 @@ const buddy = mountBuddy(document.getElementById('heroBuddy'), {
     'unpaid mascot. for now.',
   ],
 });
-setTimeout(() => buddy && buddy.say('hiii, tap me', 2400), seen ? 1600 : 4200);
+// she hides behind the instax and peeks out of its edges, pointing at the way in.
+// every spot is checked so she never lands on the copy, the buttons, the doors or the header.
+buddy && buddy.roam({
+  stage: document.querySelector('.hero-visual .instax'),
+  bounds: document.querySelector('.hero'),
+  avoid: '.hero-copy > *, #siteHeader, .doors',
+  start: seen ? 1.6 : 4.2,
+  stops: [
+    { edge: 'right', at: 0.3, act: 'wave', say: 'hiii, tap me' },
+    { edge: 'left', at: 0.3, act: 'point', target: '.hero-ctas .btn.solid', say: 'the projects are in here' },
+    { edge: 'top', at: 0.72, act: 'wave' }, // top-edge spots only run when there is room above the photo
+    { edge: 'right', at: 0.55, act: 'look' },
+    { edge: 'top', at: 0.28, act: 'peekaboo' },
+    { edge: 'left', at: 0.62, act: 'point', target: '.hero-ctas .btn.ghost', say: 'films + songs this way' },
+    { edge: 'right', at: 0.22, act: 'peekaboo', say: 'boo' },
+    { edge: 'top', at: 0.5, act: 'point', target: '.doors .door', say: 'or pick a door' },
+  ],
+});
 
 paintHover();

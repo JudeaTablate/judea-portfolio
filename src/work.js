@@ -42,7 +42,10 @@ function setActive(c) {
   wpNum.textContent = c.n; wpName.textContent = c.name;
   document.querySelectorAll('.crumb-live').forEach((el) => { el.textContent = c.name; });
   pill.classList.add('pulse'); setTimeout(() => pill.classList.remove('pulse'), 500);
-  if (!first && railBuddy) { railBuddy.hop(); railBuddy.say(`now: ${c.name.toLowerCase()}`, 1600); }
+  if (!first && railBuddy) {
+    railBuddy.hop(); railBuddy.say(`now: ${c.name.toLowerCase()}`, 1600);
+    railBuddy.pointAt(railList.querySelector(`a[data-id="${c.id}"] .lcd`), { hold: 0.9 }); // points up at the chapter you're in
+  }
 }
 chapters.forEach((c) => {
   ScrollTrigger.create({ trigger: c.el, start: 'top 45%', end: 'bottom 45%', onToggle: (s) => s.isActive && setActive(c) });
