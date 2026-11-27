@@ -16,7 +16,7 @@ const PROJECTS = [
     tags: ['Real-Time Sync', 'Multi-Currency'], live: 'https://splitbill-5ulc.onrender.com' },
   { slug: 'backup', title: 'Automated Cloud Backup', sub: 'Python + GitHub Actions', kicker: 'Python · GitHub Actions · rclone',
     desc: 'A weekly GitHub Actions job that zips the repo with Python and uploads a timestamped archive to Google Drive through rclone, with the rclone config kept in GitHub Secrets. It runs every Sunday or on demand.',
-    tags: ['Automation', 'Cloud'], code: 'https://github.com/JudeaTablate/cloud-auto-backup' },
+    tags: ['Automation', 'Cloud'], live: 'https://judeatablate.github.io/cloud-auto-backup/', code: 'https://github.com/JudeaTablate/cloud-auto-backup' },
   { slug: 'wine', title: 'Wine About It', sub: 'Wine basics, no snobbery', kicker: 'React · Vite · Three.js · Gemini API',
     desc: 'A front-end site that teaches wine basics without the snobbery, with varietals, tasting notes, and pairings in plain language. Built with React and Vite, with an AI assistant powered by the Gemini API.',
     tags: ['Content Site', 'React', 'AI'], live: 'https://wine-about-it.vercel.app/' },
