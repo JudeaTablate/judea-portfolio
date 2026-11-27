@@ -34,7 +34,7 @@ This is the source for my personal portfolio site — a dark, motion-heavy site 
 |---|---|
 | **[PsyClick](https://psyclick-app.vercel.app/)** | Thesis project — a clinician-guided screening tool pairing PHQ-9/GAD-7 questionnaires with keystroke/mouse-dynamics analysis. Lead Researcher & Documentation Specialist. |
 | **[Sentinel](https://github.com/JudeaTablate/sentinel-uptime-monitor)** | Automates manual system health checks and routes real-time alerts to Discord. |
-| **[Automated Cloud Backup System](https://github.com/JudeaTablate/cloud-auto-backup)** | Python + GitHub Actions, syncing files to Google Drive with GitHub Secrets. |
+| **[Automated Cloud Backup System](https://judeatablate.github.io/cloud-auto-backup/)** | Python + GitHub Actions, syncing files to Google Drive with GitHub Secrets. [Code](https://github.com/JudeaTablate/cloud-auto-backup) |
 
 <br>
 
