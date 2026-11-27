@@ -29,7 +29,7 @@ pill.addEventListener('click', (e) => {
 sheet.addEventListener('click', () => { sheet.classList.remove('open'); pill.setAttribute('aria-expanded', 'false'); });
 document.addEventListener('click', (e) => { if (!sheet.contains(e.target) && e.target !== pill) { sheet.classList.remove('open'); pill.setAttribute('aria-expanded', 'false'); } });
 
-// mini Ja peeks around the edge of the screen and points at things in the section you're reading
+// mini Ja lives in the bottom-right corner and points at things in the section you're reading
 const buddyHost = document.createElement('div');
 buddyHost.className = 'page-buddy';
 document.body.appendChild(buddyHost);
@@ -48,7 +48,6 @@ const peeker = pageBuddy.peekScreen({
       { label: 'Open the terminal >_', say: 'type help!', run: () => document.getElementById('termBtn')?.click() },
     ];
   },
-  avoid: 'main h1, main h2, main h3, main h4, main p, main a, main button, main img, .ch-num, .cert-card, .tech-tile, .win-card, .win-spot, .exp-row, .proj-visual, .bframe, .term, .chip, .next-door, #siteHeader, .rail, .where-pill, .where-sheet',
   sections: {
     intro: { title: '.page-title', enter: 'hi! this is all her work', targets: '#toc a', lines: ['tap a chapter to jump', 'projects first, obviously', 'or just scroll, i’ll tag along', 'six chapters, all good ones'] },
     work: { title: '#work .ch-title', enter: 'my projects! scroll to flip through', targets: '.proj.active h3', lines: ['i built this one', 'keep scrolling for the next one', 'tap a name up top to jump'] },
