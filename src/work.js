@@ -39,6 +39,7 @@ const pageBuddy = mountBuddy(buddyHost, {
 const peeker = pageBuddy.peekScreen({
   avoid: 'main h1, main h2, main h3, main h4, main p, main a, main button, main img, .ch-num, .cert-card, .tech-tile, .win-card, .win-spot, .exp-row, .proj-visual, .bframe, .term, .chip, .next-door, #siteHeader, .rail, .where-pill, .where-sheet',
   sections: {
+    intro: { title: '.page-title', enter: 'hi! this is all her work', targets: '#toc a', lines: ['tap a chapter to jump', 'projects first, obviously', 'or just scroll, i’ll tag along', 'six chapters, all good ones'] },
     work: { title: '#work .ch-title', enter: 'my projects! scroll to flip through', targets: '.proj.active h3', lines: ['i built this one', 'keep scrolling for the next one', 'tap a name up top to jump'] },
     wins: { title: '#wins .ch-title', enter: 'the proud section', targets: '#wins .ws-num, #wins .win-card h3', lines: ['look look', 'this one!', 'still proud of this'] },
     experience: { title: '#experience .ch-title', enter: 'where i’ve worked + led', targets: '#experience .exp-org', lines: ['busy, busy', 'this one', 'learned a lot here'] },
@@ -64,6 +65,9 @@ chapters.forEach((c) => {
   ScrollTrigger.create({ trigger: c.el, start: 'top 45%', end: 'bottom 45%', onToggle: (s) => { if (s.isActive) { setActive(c); peeker.onSection(c.id); } } });
 });
 setActive(chapters[0]);
+// on the intro she says hi and points at the chapter cards
+const introTrigger = ScrollTrigger.create({ trigger: '.page-intro', start: 'top bottom', end: 'bottom 45%', onToggle: (s) => s.isActive && peeker.onSection('intro') });
+peeker.onSection(introTrigger.isActive ? 'intro' : chapters[0].id);
 // pill only after the intro scrolls away
 ScrollTrigger.create({ trigger: '.page-intro', start: 'bottom 30%', onEnter: () => document.body.classList.add('in-chapters'), onLeaveBack: () => document.body.classList.remove('in-chapters') });
 // overall progress line on the rail
