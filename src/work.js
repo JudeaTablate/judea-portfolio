@@ -57,10 +57,11 @@ function setActive(c) {
   wpNum.textContent = c.n; wpName.textContent = c.name;
   document.querySelectorAll('.crumb-live').forEach((el) => { el.textContent = c.name; });
   pill.classList.add('pulse'); setTimeout(() => pill.classList.remove('pulse'), 500);
-  peeker.onSection(c.id);
 }
+// Ja follows whatever part of the page you're in, even when it's the same chapter as before
+// (e.g. up to the intro and back down into Projects), so she's told separately from setActive()
 chapters.forEach((c) => {
-  ScrollTrigger.create({ trigger: c.el, start: 'top 45%', end: 'bottom 45%', onToggle: (s) => s.isActive && setActive(c) });
+  ScrollTrigger.create({ trigger: c.el, start: 'top 45%', end: 'bottom 45%', onToggle: (s) => { if (s.isActive) { setActive(c); peeker.onSection(c.id); } } });
 });
 setActive(chapters[0]);
 // pill only after the intro scrolls away
