@@ -278,7 +278,7 @@ export function mountBuddy(host, { lines = [], size } = {}) {
     const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
     const inView = (r) => r.width > 0 && r.top >= top + 10 && r.bottom <= innerHeight - 40;
     const overlap = (a, b) => Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left)) * Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
-    let tl = null, idleT = 0, sec = null, n = 0, enterPending = false, active = null, startY = 0;
+    let tl = null, idleT = 0, sec = null, n = 0, enterPending = false, active = null, startY = 0, held = false;
 
     // a point of the avatar (viewBox coords) -> screen offset from her pivot, for a given tilt/facing
     function rot(px, py, deg, f, s) {
@@ -379,7 +379,7 @@ export function mountBuddy(host, { lines = [], size } = {}) {
     // peek at something in the current section from whichever edge covers the least
     function idlePeek() {
       idleT = 0;
-      if (!sec || tl) return;
+      if (!sec || tl || held) return;
       const firstTime = enterPending;
       const visibleOf = (sel) => (sel ? [...document.querySelectorAll(sel)] : []).filter((el) => inView(el.getBoundingClientRect()));
       // just entered a section: point at its title if it's on screen, otherwise at anything in it
@@ -408,6 +408,13 @@ export function mountBuddy(host, { lines = [], size } = {}) {
     };
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', () => { if (active) { tl && tl.kill(); tl = null; retreat(); } onScroll(); });
+
+    // hovering her holds her still (mid-move too) so she's easy to click
+    btn.addEventListener('pointerenter', () => { held = true; tl && tl.pause(); clearTimeout(idleT); });
+    btn.addEventListener('pointerleave', () => {
+      held = false;
+      if (tl) tl.resume(); else { clearTimeout(idleT); idleT = setTimeout(idlePeek, 2500); }
+    });
     gsap.set(btn, { x: -btn.offsetWidth * 2, y: innerHeight / 2 });
 
     return {
