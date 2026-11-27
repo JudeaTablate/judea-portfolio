@@ -267,157 +267,123 @@ export function mountBuddy(host, { lines = [], size } = {}) {
     wait = gsap.delayedCall(start, () => { wait = null; started = true; next(); });
   }
 
-  /* ---------- screen-edge mode (long pages) ---------- */
-  // She hides just past the left or right edge of the screen and peeks around it like it's a
-  // door frame: her feet stay out of sight and she pivots on them, so her head tilts into view
-  // with her whole face showing. She sneaks a look first, flinches, then pops out, looks at
-  // something in the section you're reading and points at it (sometimes she plays peekaboo).
-  // She comes out once scrolling settles, stays out between actions, and ducks away only
-  // while you scroll on.
+  /* ---------- corner mode (long pages) ---------- */
+  // Her home is the bottom-right corner of the screen. She leans in around the edge like it's a
+  // door frame (her feet stay out of sight and she pivots on them, so her whole face shows) and
+  // stays there the whole time, scrolling included. From there she greets each section, points
+  // at things in it, waves, looks around and now and then plays peekaboo.
   const LEAN = 30; // how far she tilts around the edge, in degrees
   const OFF = 56;  // her pivot sits this far past the edge (viewBox units): fully hidden when upright
   // `menu(sectionId)` returns the shortcuts she offers when clicked: [{ label, say, run }]
-  function peekScreen({ sections, avoid = '', top = 68, menu }) {
-    if (reduce) return { onSection() {} };
+  function peekScreen({ sections, top = 68, menu }) {
     host.classList.add('screen');
     const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
     const inView = (r) => r.width > 0 && r.top >= top + 10 && r.bottom <= innerHeight - 40;
-    const overlap = (a, b) => Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left)) * Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
-    let tl = null, idleT = 0, sec = null, secId = null, n = 0, enterPending = false, active = null, startY = 0, held = false, menuOpen = false;
+    const visibleOf = (sel) => (sel ? [...document.querySelectorAll(sel)] : []).filter((el) => inView(el.getBoundingClientRect()));
+    let tl = null, idleT = 0, sec = null, secId = null, n = 0, enterPending = false, active = null, held = false, menuOpen = false, out = false;
 
     // a point of the avatar (viewBox coords) -> screen offset from her pivot, for a given tilt/facing
     function rot(px, py, deg, f, s) {
       const a = deg / R2D, dx = (px - 100) * f * s, dy = (py - 290) * s;
       return { x: dx * Math.cos(a) - dy * Math.sin(a), y: dx * Math.sin(a) + dy * Math.cos(a) };
     }
-
-    // where she peeks from to look at `target`, scored by how much page content she'd cover
-    function geom(target, side, blockers) {
-      const w = btn.offsetWidth, h = btn.offsetHeight, s = w / 200, t = target.getBoundingClientRect();
-      const left = side === 'left', f = left ? 1 : -1, lean = left ? LEAN : -LEAN;
-      const head = rot(100, 78, lean, f, s), crown = rot(100, 17, lean, f, s);
-      // line her head up with the target, keeping room above it for the speech bubble
-      const py = clamp(t.top + t.height / 2 - head.y, top + 64 - crown.y, innerHeight + 30 * s);
-      const px = left ? -OFF * s : innerWidth + OFF * s;
-      const reach = 96 * s; // how far into the page her head and shoulders get
-      const box = { left: left ? 0 : innerWidth - reach, right: left ? reach : innerWidth, top: py + crown.y, bottom: py - 40 * s };
-      const area = (box.right - box.left) * (box.bottom - box.top);
-      const cover = blockers.reduce((sum, r) => sum + overlap(box, r), 0) / area;
+    // her spot in the corner for the current screen size
+    function home() {
+      const w = btn.offsetWidth, h = btn.offsetHeight, s = w / 200, f = -1, lean = -LEAN;
+      const pivot = { x: innerWidth + OFF * s, y: innerHeight + 24 * s }, crown = rot(100, 17, lean, f, s);
       return {
-        side, face: f, lean, cover, target, reach,
-        pivot: { x: px, y: py },
-        vis: { x: px - w / 2, y: py - h }, hid: { x: px - w / 2 + (left ? -w * 0.15 : w * 0.15), y: py - h },
-        crown: { x: px + crown.x, y: py + crown.y },
+        side: 'right', face: f, lean, reach: 96 * s, pivot,
+        vis: { x: pivot.x - w / 2, y: pivot.y - h }, hid: { x: pivot.x - w / 2 + w * 0.15, y: pivot.y - h },
+        crown: { x: pivot.x + crown.x, y: pivot.y + crown.y },
       };
     }
 
     function lookAt(el, ms) { // eyes on the thing she's about to point at
       const t = el.getBoundingClientRect(), r = look.getBoundingClientRect();
       let dx = t.left + t.width / 2 - (r.left + r.width / 2), dy = t.top + t.height / 2 - (r.top + r.height / 2);
-      const a = -(active ? active.lean : 0) / R2D;
+      const a = -active.lean / R2D;
       [dx, dy] = [(dx * Math.cos(a) - dy * Math.sin(a)) * facing, dx * Math.sin(a) + dy * Math.cos(a)];
       const d = Math.hypot(dx, dy) || 1;
       look.setAttribute('transform', `translate(${(dx / d) * 3.4} ${(dy / d) * 3.4})`);
       gazeUntil = performance.now() + ms;
     }
 
-    function retreat(t = gsap.timeline(), g = active) {
-      if (!g) return t;
-      return t.call(() => { spot = null; hush(); host.classList.remove('waving'); })
-        .to(host, { '--arm': '0deg', '--armb': '0deg', '--head': '0deg', duration: 0.15 })
-        .to(pose, { rotation: 0, duration: 0.32, ease: 'back.in(1.6)' }, '<')
-        .to(btn, { x: g.hid.x, duration: 0.18, ease: 'power2.in' }, '>-0.06')
-        .call(() => { active = null; });
+    function run(build) { // play one action, then schedule the next
+      tl && tl.kill();
+      tl = gsap.timeline({ onComplete: () => { tl = null; schedule(rand(5000, 8000)); } });
+      build(tl, active.lean);
+      tl.to(host, { '--head': '0deg', '--arm': '0deg', duration: 0.3 });
+    }
+    function schedule(ms) { clearTimeout(idleT); idleT = setTimeout(next, ms); }
+
+    // first appearance: creep up, peek with one eye, flinch, then pop out for good
+    function enter() {
+      active = home(); facing = active.face; gsap.set(face, { scaleX: active.face });
+      const g = active, L = g.lean;
+      gsap.set(btn, { x: g.hid.x, y: g.hid.y });
+      if (reduce) { gsap.set(btn, { x: g.vis.x }); gsap.set(pose, { rotation: L }); out = true; spot = g; return; }
+      tl = gsap.timeline({ onComplete: () => { tl = null; out = true; next(); } })
+        .to(btn, { x: g.vis.x, duration: 0.3, ease: 'power1.out' })
+        .to(pose, { rotation: L * 0.42, duration: 0.6, ease: 'power2.out' }, '<0.1')
+        .to(host, { '--head': '-9deg', duration: 0.4, ease: 'power2.out' }, '<')
+        .to({}, { duration: 0.55 })
+        .to(pose, { rotation: L * 0.22, duration: 0.14, ease: 'power2.in' })
+        .to(pose, { rotation: L, duration: 0.95, ease: 'elastic.out(1,0.42)' })
+        .fromTo(face, { scaleY: 0.9 }, { scaleY: 1, duration: 0.7, ease: 'elastic.out(1,0.35)' }, '<')
+        .to(host, { '--head': '0deg', duration: 0.35, ease: 'back.out(2)' }, '<')
+        .call(() => { spot = g; });
     }
 
-    // Once she's out she stays parked at the edge between actions. If the next thing to point at
-    // is reachable from where she already is, she just turns to it; otherwise she ducks out and
-    // peeks in again at the new spot. `leave` = go back into hiding afterwards (thin margins).
-    function show(g, { line, hold = 1.4, after, peekaboo, leave } = {}) {
-      tl && tl.kill();
-      tl = gsap.timeline({ onComplete: () => { tl = null; after && after(); } });
-      const L = g.lean;
-      const stay = active && active.side === g.side && Math.abs(active.pivot.y - g.pivot.y) < 70;
-      if (stay) {
-        g = { ...active, target: g.target, cover: g.cover };
-        tl.call(() => { active = g; spot = g; lookAt(g.target, 2600); if (line) say(line, 2600 + hold * 700); })
-          .to(pose, { rotation: L, scaleX: 1, scaleY: 1, duration: 0.25 }) // in case she was interrupted mid-move
-          .to(host, { '--head': '-8deg', duration: 0.25, ease: 'power2.out' }, '<')
-          .to(host, { '--head': '3deg', duration: 0.3, ease: 'back.out(2)' });
-      } else {
-        retreat(tl);
-        tl.call(() => { active = g; facing = g.face; gsap.set(face, { scaleX: g.face }); })
-          .set(btn, { x: g.hid.x, y: g.hid.y })
-          .set(pose, { rotation: 0, scaleX: 1, scaleY: 1 })
-          .set(host, { '--arm': '0deg', '--armb': '0deg', '--head': '0deg' })
-          // sneak: creep up to the edge and lean out just enough for one eye
-          .to(btn, { x: g.vis.x, duration: 0.3, ease: 'power1.out' })
-          .to(pose, { rotation: L * 0.42, duration: 0.6, ease: 'power2.out' }, '<0.1')
-          .to(host, { '--head': '-9deg', duration: 0.4, ease: 'power2.out' }, '<')
-          .call(() => lookAt(g.target, 2600))
-          .to({}, { duration: 0.55 })
-          // flinch back... then pop out all the way, with a springy wobble
-          .to(pose, { rotation: L * 0.22, duration: 0.14, ease: 'power2.in' })
-          .to(pose, { rotation: L, duration: 0.95, ease: 'elastic.out(1,0.42)' })
-          .fromTo(face, { scaleY: 0.9 }, { scaleY: 1, duration: 0.7, ease: 'elastic.out(1,0.35)' }, '<')
-          .to(host, { '--head': '4deg', duration: 0.35, ease: 'back.out(2)' }, '<')
-          .call(() => { spot = g; if (line) say(line, 2600 + hold * 700); });
-      }
-      tl.call(() => { startY = scrollY; });
-      tl.add(pointTl(g.target, { lean: L, hold }), '+=0.05');
-      if (peekaboo) { // duck out of sight, then burst back in waving
-        tl.call(hush)
-          .to(pose, { rotation: 0, duration: 0.22, ease: 'back.in(2)' }, '+=0.1')
-          .to(host, { '--head': '0deg', duration: 0.2 }, '<')
+    // her next little thing to do, picked from what's on screen in the section you're reading
+    function next() {
+      idleT = 0;
+      if (!out || !sec || tl || held || menuOpen) return;
+      if (reduce) { if (enterPending) { enterPending = false; say(sec.enter, 3200); } return; } // no animation: just talk
+      const first = enterPending; enterPending = false;
+      const els = first && visibleOf(sec.title).length ? visibleOf(sec.title) : visibleOf(sec.targets);
+      const roll = Math.random();
+      if (els.length && (first || roll < 0.55)) { // point at something
+        const el = els[n++ % els.length], line = first ? sec.enter : pick(sec.lines);
+        run((t, L) => t
+          .call(() => { lookAt(el, 2600); say(line, 3400); })
+          .to(host, { '--head': '-8deg', duration: 0.25, ease: 'power2.out' })
+          .add(pointTl(el, { lean: L, hold: 1.4 }), '+=0.05')
+          .to(host, { '--head': '-6deg', duration: 0.35, yoyo: true, repeat: 1, ease: 'sine.inOut' }));
+      } else if (roll < 0.7 || first) { // wave + a line
+        run((t) => t
+          .call(() => { host.classList.add('waving'); say(first ? sec.enter : pick(sec.lines), 3000); })
+          .to(host, { '--head': '7deg', duration: 0.3, yoyo: true, repeat: 3, ease: 'sine.inOut' })
+          .call(() => host.classList.remove('waving'), null, '+=0.3'));
+      } else if (roll < 0.85) { // curious look around
+        run((t) => t
+          .to(host, { '--head': '-11deg', duration: 0.35, ease: 'power2.inOut' })
+          .to(host, { '--head': '11deg', duration: 0.5, ease: 'power2.inOut' }, '+=0.35')
+          .to(host, { '--head': '0deg', duration: 0.35, ease: 'power2.inOut' }, '+=0.35'));
+      } else { // peekaboo: duck out, then burst back in waving
+        run((t, L) => t
+          .call(hush)
+          .to(pose, { rotation: 0, duration: 0.22, ease: 'back.in(2)' })
           .to({}, { duration: 0.6 })
           .to(pose, { rotation: L, duration: 0.8, ease: 'elastic.out(1,0.4)' })
           .call(() => { host.classList.add('waving'); say(pick(['peekaboo!', 'boo!', 'hehe'])); })
           .to(host, { '--head': '-7deg', duration: 0.3, yoyo: true, repeat: 3, ease: 'sine.inOut' })
-          .call(() => host.classList.remove('waving'));
-      } else {
-        tl.to(host, { '--head': '-6deg', duration: 0.35, yoyo: true, repeat: 1, ease: 'sine.inOut' }); // little head bob
+          .call(() => host.classList.remove('waving')));
       }
-      tl.to(host, { '--head': '0deg', duration: 0.3 });
-      if (leave) { tl.to({}, { duration: 0.5 }); retreat(tl, g); }
     }
 
-    // peek at something in the current section from whichever edge covers the least
-    function idlePeek() {
-      idleT = 0;
-      if (!sec || tl || held || menuOpen) return;
-      const firstTime = enterPending;
-      const visibleOf = (sel) => (sel ? [...document.querySelectorAll(sel)] : []).filter((el) => inView(el.getBoundingClientRect()));
-      // just entered a section: point at its title if it's on screen, otherwise at anything in it
-      const els = (firstTime && visibleOf(sec.title).length) ? visibleOf(sec.title) : visibleOf(sec.targets);
-      if (!els.length) { idleT = setTimeout(idlePeek, 2000); return; }
-      const blockers = avoid ? [...document.querySelectorAll(avoid)].map((el) => el.getBoundingClientRect()).filter((r) => r.width && r.bottom > 0 && r.top < innerHeight) : [];
-      const el = els[n % els.length];
-      // the edge where she'd cover the least (a coin flip when both are clear)
-      const g = ['left', 'right'].map((s) => geom(el, s, blockers)).sort((a, b) => (a.cover - b.cover) || (Math.random() - 0.5))[0];
-      n += 1; enterPending = false;
-      // where the margins are thin she'd overlap the page, so there she pops back in after each peek
-      const thin = g.cover > 0.15;
-      show(g, {
-        line: firstTime ? sec.enter : pick(sec.lines),
-        peekaboo: !firstTime && Math.random() < 0.3,
-        leave: thin,
-        after: () => { idleT = setTimeout(idlePeek, thin ? rand(5000, 7000) : rand(4500, 7000)); },
-      });
-    }
-
-    const onScroll = () => {
-      // small nudges are fine; a real scroll and she ducks away
-      if (active && Math.abs(scrollY - startY) > 140) { closeMenu(); tl && tl.kill(); tl = null; retreat(); }
-      clearTimeout(idleT);
-      idleT = setTimeout(idlePeek, 1000);
-    };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', () => { if (active) { tl && tl.kill(); tl = null; retreat(); } onScroll(); });
+    // keep her tucked into the corner when the window changes size
+    window.addEventListener('resize', () => {
+      if (!active) return;
+      active = home();
+      gsap.set(btn, { x: active.vis.x, y: active.vis.y });
+      if (spot) spot = active;
+      if (menuOpen) placeMenu();
+    });
 
     // hovering her holds her still (mid-move too) so she's easy to click
     btn.addEventListener('pointerenter', () => { held = true; tl && tl.pause(); clearTimeout(idleT); });
     btn.addEventListener('pointerleave', () => { held = false; if (!menuOpen) carryOn(); });
-    function carryOn() { if (tl) tl.resume(); else { clearTimeout(idleT); idleT = setTimeout(idlePeek, 2500); } }
+    function carryOn() { if (tl) tl.resume(); else schedule(2500); }
 
     /* tap menu: click her and she offers a few shortcuts */
     const menuEl = document.createElement('div');
@@ -471,13 +437,14 @@ export function mountBuddy(host, { lines = [], size } = {}) {
         bs[(i + (e.key === 'ArrowDown' ? 1 : -1) + bs.length) % bs.length].focus(); e.preventDefault();
       }
     });
-    gsap.set(btn, { x: -btn.offsetWidth * 2, y: innerHeight / 2 });
+    gsap.set(btn, { x: innerWidth + btn.offsetWidth, y: innerHeight - btn.offsetHeight });
+    setTimeout(enter, 600); // she comes out as soon as the page is up, and stays
 
     return {
       onSection(id) {
         if (!sections[id] || sec === sections[id]) return;
         sec = sections[id]; secId = id; n = 0; enterPending = true;
-        if (!tl) { clearTimeout(idleT); idleT = setTimeout(idlePeek, 900); }
+        if (out && !tl && !held && !menuOpen) schedule(500); // greet the new section right away
       },
     };
   }
