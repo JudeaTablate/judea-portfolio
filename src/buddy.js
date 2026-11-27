@@ -49,10 +49,10 @@ export function mountBuddy(host, { lines = [], size } = {}) {
   btn.addEventListener('mouseleave', () => host.classList.remove('waving'));
 
   // eyes follow pointer, throttled to one update per frame, only while visible
-  let visible = false, raf = 0, px = 0, py = 0;
+  let visible = false, raf = 0, px = 0, py = 0, gazeUntil = 0; // gazeUntil: eyes locked on something she's showing you
   new IntersectionObserver(([e]) => { visible = e.isIntersecting; host.classList.toggle('paused', !visible); }).observe(host);
   window.addEventListener('pointermove', (e) => {
-    if (!visible || raf) return;
+    if (!visible || raf || performance.now() < gazeUntil) return;
     px = e.clientX; py = e.clientY;
     raf = requestAnimationFrame(() => {
       raf = 0;
@@ -66,9 +66,11 @@ export function mountBuddy(host, { lines = [], size } = {}) {
   /* ---------- pointing ---------- */
   // arm rotation (deg) that aims the front hand at the centre of `el`
   function armAngle(el, lean = 0) {
-    const t = el.getBoundingClientRect(), r = btn.getBoundingClientRect();
-    const sx = r.left + ((facing > 0 ? SHOULDER.x : 200 - SHOULDER.x) / 200) * r.width;
-    const sy = r.top + (SHOULDER.y / 290) * r.height;
+    const t = el.getBoundingClientRect(), r = btn.getBoundingClientRect(), s = r.width / 200;
+    // her shoulder on screen: the body leans (rotates) around the bottom centre of her box
+    const b = lean / R2D, lx = (SHOULDER.x - 100) * facing * s, ly = (SHOULDER.y - 290) * s;
+    const sx = r.left + r.width / 2 + lx * Math.cos(b) - ly * Math.sin(b);
+    const sy = r.bottom + lx * Math.sin(b) + ly * Math.cos(b);
     let dx = t.left + t.width / 2 - sx, dy = t.top + t.height / 2 - sy;
     const a = -lean / R2D; // undo the body lean, then the mirror flip
     [dx, dy] = [dx * Math.cos(a) - dy * Math.sin(a), dx * Math.sin(a) + dy * Math.cos(a)];
@@ -101,6 +103,14 @@ export function mountBuddy(host, { lines = [], size } = {}) {
 
   /* ---------- roaming / peeking ---------- */
   function placeBubble(g) {
+    if (g.crown) { // screen-edge peek: just above her tilted head, leaning into the page
+      bubble.style.maxWidth = '210px';
+      const bw = bubble.offsetWidth, bh = bubble.offsetHeight, left = g.side === 'left';
+      bubble.style.left = `${Math.max(8, Math.min(innerWidth - 8 - bw, left ? g.crown.x - 6 : g.crown.x - bw + 6))}px`;
+      bubble.style.top = `${Math.max(8, g.crown.y - bh - 8)}px`;
+      bubble.dataset.tail = left ? 'l' : 'r';
+      return;
+    }
     bubble.style.maxWidth = g.free ? `${g.free}px` : ''; // measure at the width it will have
     const bw = bubble.offsetWidth, bh = bubble.offsetHeight, w = btn.offsetWidth;
     const hx = g.vis.x + w / 2;
@@ -254,111 +264,135 @@ export function mountBuddy(host, { lines = [], size } = {}) {
   }
 
   /* ---------- screen-edge mode (long pages) ---------- */
-  // She lives just past the edge of the screen and leans into the empty side margin to point at
-  // something in the section you're reading. She only comes out once scrolling settles and ducks
-  // away as soon as you scroll. Where the margins are too thin (phones) she pops up from behind
-  // `perch` (the "you are here" pill) when you enter a new section instead.
-  function peekScreen({ sections, avoid = '', perch, top = 68 }) {
+  // She hides just past the left or right edge of the screen and peeks around it like it's a
+  // door frame: her feet stay out of sight and she pivots on them, so her head tilts into view
+  // with her whole face showing. She sneaks a look first, flinches, then pops out, looks at
+  // something in the section you're reading and points at it (sometimes she plays peekaboo).
+  // She comes out once scrolling settles and ducks away if you scroll on.
+  const LEAN = 30; // how far she tilts around the edge, in degrees
+  const OFF = 56;  // her pivot sits this far past the edge (viewBox units): fully hidden when upright
+  function peekScreen({ sections, avoid = '', top = 68 }) {
     if (reduce) return { onSection() {} };
     host.classList.add('screen');
-    const hit = (a, b, pad = 8) => a.left < b.right + pad && a.right > b.left - pad && a.top < b.bottom + pad && a.bottom > b.top - pad;
     const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-    const inView = (r) => r.width > 0 && r.top >= top + 10 && r.bottom <= innerHeight - 80;
-    let tl = null, idleT = 0, sec = null, n = 0, enterPending = false, active = null; // active = the peek in progress
+    const inView = (r) => r.width > 0 && r.top >= top + 10 && r.bottom <= innerHeight - 40;
+    const overlap = (a, b) => Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left)) * Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
+    let tl = null, idleT = 0, sec = null, n = 0, enterPending = false, active = null, startY = 0;
 
-    function sideGeom(target, side) {
-      const w = btn.offsetWidth, h = btn.offsetHeight, t = target.getBoundingClientRect();
-      const left = side === 'left', lean = 7, tilt = h * 0.85 * Math.sin(lean / R2D);
-      const y = clamp(t.top + t.height / 2 - h * 0.42, top + 8, innerHeight - h - 8);
-      const blockers = avoid ? [...document.querySelectorAll(avoid)].map((el) => el.getBoundingClientRect()).filter((r) => r.width && r.bottom > 0 && r.top < innerHeight) : [];
-      // lean in as far as the free margin allows; she needs ~42% showing so her pointing arm is visible
-      for (let k = 0.62; k >= 0.42; k -= 0.05) {
-        const depth = w * k, span = depth + tilt;
-        const box = left ? { left: 0, right: span, top: y, bottom: y + h } : { left: innerWidth - span, right: innerWidth, top: y, bottom: y + h };
-        if (blockers.some((r) => hit(box, r))) continue;
-        // widest speech bubble that still fits in the free margin above her head
-        const free = [220, 190, 160, 140, 120].find((bw) => {
-          const b = left ? { left: 8, right: 8 + bw, top: y - 64, bottom: y } : { left: innerWidth - 8 - bw, right: innerWidth - 8, top: y - 64, bottom: y };
-          return !blockers.some((r) => hit(b, r, 2));
-        });
-        return {
-          free: free || 170,
-          edge: 'side', tail: left ? 'l' : 'r', face: left ? 1 : -1, lean: left ? lean : -lean,
-          vis: { x: left ? depth - w : innerWidth - depth, y }, hid: { x: left ? -w - 16 : innerWidth + 16, y },
-        };
-      }
-      return null;
+    // a point of the avatar (viewBox coords) -> screen offset from her pivot, for a given tilt/facing
+    function rot(px, py, deg, f, s) {
+      const a = deg / R2D, dx = (px - 100) * f * s, dy = (py - 290) * s;
+      return { x: dx * Math.cos(a) - dy * Math.sin(a), y: dx * Math.sin(a) + dy * Math.cos(a) };
     }
-    function perchGeom() {
-      if (!perch) return null;
-      const p = perch.getBoundingClientRect(), w = btn.offsetWidth, h = btn.offsetHeight;
-      if (!p.width || p.top > innerHeight - 20 || p.width < w * 1.2) return null;
-      const x = p.left + 6;
-      return { edge: 'top', tail: 'l', face: 1, lean: 0, vis: { x, y: p.top - h * 0.5 }, hid: { x, y: p.top + 10 } };
+
+    // where she peeks from to look at `target`, scored by how much page content she'd cover
+    function geom(target, side, blockers) {
+      const w = btn.offsetWidth, h = btn.offsetHeight, s = w / 200, t = target.getBoundingClientRect();
+      const left = side === 'left', f = left ? 1 : -1, lean = left ? LEAN : -LEAN;
+      const head = rot(100, 78, lean, f, s), crown = rot(100, 17, lean, f, s);
+      // line her head up with the target, keeping room above it for the speech bubble
+      const py = clamp(t.top + t.height / 2 - head.y, top + 64 - crown.y, innerHeight + 30 * s);
+      const px = left ? -OFF * s : innerWidth + OFF * s;
+      const reach = 96 * s; // how far into the page her head and shoulders get
+      const box = { left: left ? 0 : innerWidth - reach, right: left ? reach : innerWidth, top: py + crown.y, bottom: py - 40 * s };
+      const area = (box.right - box.left) * (box.bottom - box.top);
+      const cover = blockers.reduce((sum, r) => sum + overlap(box, r), 0) / area;
+      return {
+        side, face: f, lean, cover, target,
+        pivot: { x: px, y: py },
+        vis: { x: px - w / 2, y: py - h }, hid: { x: px - w / 2 + (left ? -w * 0.15 : w * 0.15), y: py - h },
+        crown: { x: px + crown.x, y: py + crown.y },
+      };
+    }
+
+    function lookAt(el, ms) { // eyes on the thing she's about to point at
+      const t = el.getBoundingClientRect(), r = look.getBoundingClientRect();
+      let dx = t.left + t.width / 2 - (r.left + r.width / 2), dy = t.top + t.height / 2 - (r.top + r.height / 2);
+      const a = -(active ? active.lean : 0) / R2D;
+      [dx, dy] = [(dx * Math.cos(a) - dy * Math.sin(a)) * facing, dx * Math.sin(a) + dy * Math.cos(a)];
+      const d = Math.hypot(dx, dy) || 1;
+      look.setAttribute('transform', `translate(${(dx / d) * 3.4} ${(dy / d) * 3.4})`);
+      gazeUntil = performance.now() + ms;
     }
 
     function retreat(t = gsap.timeline(), g = active) {
       if (!g) return t;
-      return t.call(() => { spot = null; active = null; hush(); })
-        .to(pose, { scaleY: 0.88, scaleX: 1.08, duration: 0.08 })
-        .to(btn, { x: g.hid.x, y: g.hid.y, duration: 0.28, ease: 'back.in(1.7)' })
-        .to(pose, { scaleY: 1, scaleX: 1, rotation: 0, duration: 0.12 }, '<')
-        .to(host, { '--arm': '0deg', '--head': '0deg', duration: 0.12 }, '<');
+      return t.call(() => { spot = null; hush(); host.classList.remove('waving'); })
+        .to(host, { '--arm': '0deg', '--armb': '0deg', '--head': '0deg', duration: 0.15 })
+        .to(pose, { rotation: 0, duration: 0.32, ease: 'back.in(1.6)' }, '<')
+        .to(btn, { x: g.hid.x, duration: 0.18, ease: 'power2.in' }, '>-0.06')
+        .call(() => { active = null; });
     }
-    function show(g, { line, point, hold = 1.6, after } = {}) {
+
+    function show(g, { line, hold = 1.4, after, peekaboo } = {}) {
       tl && tl.kill();
       tl = gsap.timeline({ onComplete: () => { tl = null; after && after(); } });
       retreat(tl);
-      tl.call(() => { active = g; })
+      const L = g.lean;
+      tl.call(() => { active = g; startY = scrollY; facing = g.face; gsap.set(face, { scaleX: g.face }); })
         .set(btn, { x: g.hid.x, y: g.hid.y })
-        .call(() => { facing = g.face; gsap.set(face, { scaleX: g.face }); })
-        .set(pose, { rotation: g.lean })
-        .to(pose, { scaleY: 0.86, scaleX: 1.1, duration: 0.1 })
-        .to(btn, { x: g.vis.x, y: g.vis.y, duration: 0.48, ease: 'back.out(2.4)' })
-        .fromTo(pose, { scaleY: 1.12, scaleX: 0.92 }, { scaleY: 1, scaleX: 1, duration: 0.7, ease: 'elastic.out(1,0.35)' }, '<')
-        .call(() => { spot = g; if (line) say(line, 2400 + hold * 600); });
-      if (point) tl.add(pointTl(point, { lean: g.lean, hold }), '+=0.1');
-      else tl.call(() => host.classList.add('waving')).to({}, { duration: hold + 1 }).call(() => host.classList.remove('waving'));
-      tl.to({}, { duration: 0.4 });
+        .set(pose, { rotation: 0, scaleX: 1, scaleY: 1 })
+        .set(host, { '--arm': '0deg', '--armb': '0deg', '--head': '0deg' })
+        // sneak: creep up to the edge and lean out just enough for one eye
+        .to(btn, { x: g.vis.x, duration: 0.3, ease: 'power1.out' })
+        .to(pose, { rotation: L * 0.42, duration: 0.6, ease: 'power2.out' }, '<0.1')
+        .to(host, { '--head': '-9deg', duration: 0.4, ease: 'power2.out' }, '<')
+        .call(() => lookAt(g.target, 2600))
+        .to({}, { duration: 0.55 })
+        // flinch back... then pop out all the way, with a springy wobble
+        .to(pose, { rotation: L * 0.22, duration: 0.14, ease: 'power2.in' })
+        .to(pose, { rotation: L, duration: 0.95, ease: 'elastic.out(1,0.42)' })
+        .fromTo(face, { scaleY: 0.9 }, { scaleY: 1, duration: 0.7, ease: 'elastic.out(1,0.35)' }, '<')
+        .to(host, { '--head': '4deg', duration: 0.35, ease: 'back.out(2)' }, '<')
+        .call(() => { spot = g; if (line) say(line, 2600 + hold * 700); });
+      tl.add(pointTl(g.target, { lean: L, hold }), '+=0.05');
+      if (peekaboo) { // duck out of sight, then burst back in waving
+        tl.call(hush)
+          .to(pose, { rotation: 0, duration: 0.22, ease: 'back.in(2)' }, '+=0.1')
+          .to(host, { '--head': '0deg', duration: 0.2 }, '<')
+          .to({}, { duration: 0.6 })
+          .to(pose, { rotation: L, duration: 0.8, ease: 'elastic.out(1,0.4)' })
+          .call(() => { host.classList.add('waving'); say(pick(['peekaboo!', 'boo!', 'hehe'])); })
+          .to(host, { '--head': '-7deg', duration: 0.3, yoyo: true, repeat: 3, ease: 'sine.inOut' })
+          .call(() => host.classList.remove('waving'));
+      } else {
+        tl.to(host, { '--head': '-6deg', duration: 0.35, yoyo: true, repeat: 1, ease: 'sine.inOut' }); // little head bob
+      }
+      tl.to({}, { duration: 0.5 });
       retreat(tl, g);
     }
 
-    // a peek at something in the current section, in whichever side margin has room
+    // peek at something in the current section from whichever edge covers the least
     function idlePeek() {
       idleT = 0;
       if (!sec || tl) return;
-      const sides = Math.random() < 0.5 ? ['right', 'left'] : ['left', 'right'];
       const firstTime = enterPending;
-      const pool = firstTime && sec.title ? [document.querySelector(sec.title)] : [...document.querySelectorAll(sec.targets)];
-      const els = pool.filter((el) => el && inView(el.getBoundingClientRect()));
-      for (const s of sides) {
-        // try the things nearest that side first, rotating so she doesn't always pick the same one
-        const near = els.map((el) => { const r = el.getBoundingClientRect(); return { el, d: s === 'left' ? r.left : innerWidth - r.right }; })
-          .sort((a, b) => a.d - b.d).slice(0, 3);
-        for (let k = 0; k < near.length; k++) {
-          const el = near[(n + k) % near.length].el;
-          const g = sideGeom(el, s);
-          if (!g) continue;
-          n += 1; enterPending = false;
-          show(g, { line: firstTime ? sec.enter : pick(sec.lines), point: el, after: () => { idleT = setTimeout(idlePeek, rand(5500, 8500)); } });
-          return;
-        }
-      }
-      if (firstTime) { // no room at the sides: say it from behind the pill instead
-        enterPending = false;
-        const g = perchGeom();
-        if (g) show(g, { line: sec.enter, point: perch, hold: 1.2 });
-      }
+      const visibleOf = (sel) => (sel ? [...document.querySelectorAll(sel)] : []).filter((el) => inView(el.getBoundingClientRect()));
+      // just entered a section: point at its title if it's on screen, otherwise at anything in it
+      const els = (firstTime && visibleOf(sec.title).length) ? visibleOf(sec.title) : visibleOf(sec.targets);
+      if (!els.length) { idleT = setTimeout(idlePeek, 2000); return; }
+      const blockers = avoid ? [...document.querySelectorAll(avoid)].map((el) => el.getBoundingClientRect()).filter((r) => r.width && r.bottom > 0 && r.top < innerHeight) : [];
+      const el = els[n % els.length];
+      // the edge where she'd cover the least (a coin flip when both are clear)
+      const g = ['left', 'right'].map((s) => geom(el, s, blockers)).sort((a, b) => (a.cover - b.cover) || (Math.random() - 0.5))[0];
+      n += 1; enterPending = false;
+      show(g, {
+        line: firstTime ? sec.enter : pick(sec.lines),
+        peekaboo: !firstTime && Math.random() < 0.35,
+        // when the margins are thin she has to overlap the page a bit, so she comes out less often
+        after: () => { idleT = setTimeout(idlePeek, g.cover > 0.15 ? rand(8000, 11000) : rand(4000, 6500)); },
+      });
     }
 
     const onScroll = () => {
-      if (active && active.edge === 'side') { tl && tl.kill(); tl = null; retreat(); }
+      // small nudges are fine; a real scroll and she ducks away
+      if (active && Math.abs(scrollY - startY) > 140) { tl && tl.kill(); tl = null; retreat(); }
       clearTimeout(idleT);
-      idleT = setTimeout(idlePeek, 1100);
+      idleT = setTimeout(idlePeek, 1000);
     };
     window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll);
-    gsap.set(btn, { x: -btn.offsetWidth - 16, y: innerHeight / 2 });
+    window.addEventListener('resize', () => { if (active) { tl && tl.kill(); tl = null; retreat(); } onScroll(); });
+    gsap.set(btn, { x: -btn.offsetWidth * 2, y: innerHeight / 2 });
 
     return {
       onSection(id) {

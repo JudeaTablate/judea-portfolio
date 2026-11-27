@@ -180,11 +180,11 @@ section.chapter.pad{padding:clamp(64px,10vh,110px) 28px;}
 .rail-list a.active b{font-weight:700;}
 .rail-list a.active::before{background:var(--accent2); border-color:var(--accent2); box-shadow:0 0 0 4px color-mix(in srgb,var(--accent2) 25%,transparent);}
 /* mini Ja on long pages: fixed, just past the screen edge (see peekScreen in buddy.js) */
-.buddy.screen{position:fixed; left:0; top:0; z-index:240; --bsize:96px; pointer-events:none;}
+.buddy.screen{position:fixed; left:0; top:0; z-index:240; --bsize:124px; pointer-events:none;}
 .buddy.screen .buddy-btn{pointer-events:auto; will-change:transform;}
 .buddy.screen .buddy-bubble{bottom:auto; left:0; top:0;}
 .buddy.screen .buddy-hop svg{filter:drop-shadow(0 6px 10px rgba(40,10,30,.22));}
-@media (max-width:860px){ .buddy.screen{--bsize:80px;} }
+@media (max-width:860px){ .buddy.screen{--bsize:96px;} }
 @media (min-width:1500px){ .rail{display:block;} }
 @media (min-width:1500px){ .in-chapters .rail{opacity:1;} .rail{opacity:0; transition:opacity .4s;} }
 
