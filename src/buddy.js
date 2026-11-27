@@ -85,7 +85,10 @@ export function mountBuddy(host, { lines = [], size } = {}) {
         .to(host, { '--arm': `${deg}deg`, duration: 0.32, ease: 'back.out(3)' })
         .to(host, { '--arm': `${deg + 9}deg`, duration: 0.11, yoyo: true, repeat: 3, ease: 'sine.inOut' })
         .to(host, { '--head': `${facing * 7}deg`, duration: 0.25 }, 0);
-      if (glow) { el.classList.remove('buddy-pointed'); void el.offsetWidth; el.classList.add('buddy-pointed'); setTimeout(() => el.classList.remove('buddy-pointed'), 1400); }
+      if (glow) { // buttons/cards get a ring, plain text gets a soft text glow
+        const cls = el.matches('a, button, .btn, .cert-card, .tech-tile, .win-card') ? 'buddy-pointed' : 'buddy-pointed-text';
+        el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); setTimeout(() => el.classList.remove(cls), 1400);
+      }
     });
     tl.to({}, { duration: 0.32 + 0.11 * 4 + hold });
     tl.to(host, { '--arm': '0deg', '--head': '0deg', duration: 0.35, ease: 'power2.inOut' });
@@ -98,14 +101,14 @@ export function mountBuddy(host, { lines = [], size } = {}) {
 
   /* ---------- roaming / peeking ---------- */
   function placeBubble(g) {
+    bubble.style.maxWidth = g.free ? `${g.free}px` : ''; // measure at the width it will have
     const bw = bubble.offsetWidth, bh = bubble.offsetHeight, w = btn.offsetWidth;
     const hx = g.vis.x + w / 2;
-    let left, tail;
-    if (g.edge === 'left') { left = hx + 14 - bw; tail = 'r'; }
-    else if (g.edge === 'right') { left = hx - 14; tail = 'l'; }
-    else { left = hx + w * 0.2; tail = 'l'; }
+    // tail 'r' = bubble sits to her left, 'l' = to her right (the bubble's tail corner points at her)
+    let tail = g.tail || (g.edge === 'left' ? 'r' : 'l');
+    let left = g.edge === 'top' ? hx + w * 0.2 : tail === 'r' ? hx + 14 - bw : hx - 14;
     // keep it on screen
-    const pr = host.parentElement.getBoundingClientRect();
+    const pr = host.getBoundingClientRect();
     if (pr.left + left + bw > innerWidth - 8) { left = hx - w * 0.2 - bw; tail = 'r'; }
     left = Math.max(8 - pr.left, Math.min(left, innerWidth - 8 - pr.left - bw));
     bubble.style.left = `${left}px`;
@@ -250,5 +253,121 @@ export function mountBuddy(host, { lines = [], size } = {}) {
     wait = gsap.delayedCall(start, () => { wait = null; started = true; next(); });
   }
 
-  return { say, hop, pointAt, roam };
+  /* ---------- screen-edge mode (long pages) ---------- */
+  // She lives just past the edge of the screen and leans into the empty side margin to point at
+  // something in the section you're reading. She only comes out once scrolling settles and ducks
+  // away as soon as you scroll. Where the margins are too thin (phones) she pops up from behind
+  // `perch` (the "you are here" pill) when you enter a new section instead.
+  function peekScreen({ sections, avoid = '', perch, top = 68 }) {
+    if (reduce) return { onSection() {} };
+    host.classList.add('screen');
+    const hit = (a, b, pad = 8) => a.left < b.right + pad && a.right > b.left - pad && a.top < b.bottom + pad && a.bottom > b.top - pad;
+    const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+    const inView = (r) => r.width > 0 && r.top >= top + 10 && r.bottom <= innerHeight - 80;
+    let tl = null, idleT = 0, sec = null, n = 0, enterPending = false, active = null; // active = the peek in progress
+
+    function sideGeom(target, side) {
+      const w = btn.offsetWidth, h = btn.offsetHeight, t = target.getBoundingClientRect();
+      const left = side === 'left', lean = 7, tilt = h * 0.85 * Math.sin(lean / R2D);
+      const y = clamp(t.top + t.height / 2 - h * 0.42, top + 8, innerHeight - h - 8);
+      const blockers = avoid ? [...document.querySelectorAll(avoid)].map((el) => el.getBoundingClientRect()).filter((r) => r.width && r.bottom > 0 && r.top < innerHeight) : [];
+      // lean in as far as the free margin allows; she needs ~42% showing so her pointing arm is visible
+      for (let k = 0.62; k >= 0.42; k -= 0.05) {
+        const depth = w * k, span = depth + tilt;
+        const box = left ? { left: 0, right: span, top: y, bottom: y + h } : { left: innerWidth - span, right: innerWidth, top: y, bottom: y + h };
+        if (blockers.some((r) => hit(box, r))) continue;
+        // widest speech bubble that still fits in the free margin above her head
+        const free = [220, 190, 160, 140, 120].find((bw) => {
+          const b = left ? { left: 8, right: 8 + bw, top: y - 64, bottom: y } : { left: innerWidth - 8 - bw, right: innerWidth - 8, top: y - 64, bottom: y };
+          return !blockers.some((r) => hit(b, r, 2));
+        });
+        return {
+          free: free || 170,
+          edge: 'side', tail: left ? 'l' : 'r', face: left ? 1 : -1, lean: left ? lean : -lean,
+          vis: { x: left ? depth - w : innerWidth - depth, y }, hid: { x: left ? -w - 16 : innerWidth + 16, y },
+        };
+      }
+      return null;
+    }
+    function perchGeom() {
+      if (!perch) return null;
+      const p = perch.getBoundingClientRect(), w = btn.offsetWidth, h = btn.offsetHeight;
+      if (!p.width || p.top > innerHeight - 20 || p.width < w * 1.2) return null;
+      const x = p.left + 6;
+      return { edge: 'top', tail: 'l', face: 1, lean: 0, vis: { x, y: p.top - h * 0.5 }, hid: { x, y: p.top + 10 } };
+    }
+
+    function retreat(t = gsap.timeline(), g = active) {
+      if (!g) return t;
+      return t.call(() => { spot = null; active = null; hush(); })
+        .to(pose, { scaleY: 0.88, scaleX: 1.08, duration: 0.08 })
+        .to(btn, { x: g.hid.x, y: g.hid.y, duration: 0.28, ease: 'back.in(1.7)' })
+        .to(pose, { scaleY: 1, scaleX: 1, rotation: 0, duration: 0.12 }, '<')
+        .to(host, { '--arm': '0deg', '--head': '0deg', duration: 0.12 }, '<');
+    }
+    function show(g, { line, point, hold = 1.6, after } = {}) {
+      tl && tl.kill();
+      tl = gsap.timeline({ onComplete: () => { tl = null; after && after(); } });
+      retreat(tl);
+      tl.call(() => { active = g; })
+        .set(btn, { x: g.hid.x, y: g.hid.y })
+        .call(() => { facing = g.face; gsap.set(face, { scaleX: g.face }); })
+        .set(pose, { rotation: g.lean })
+        .to(pose, { scaleY: 0.86, scaleX: 1.1, duration: 0.1 })
+        .to(btn, { x: g.vis.x, y: g.vis.y, duration: 0.48, ease: 'back.out(2.4)' })
+        .fromTo(pose, { scaleY: 1.12, scaleX: 0.92 }, { scaleY: 1, scaleX: 1, duration: 0.7, ease: 'elastic.out(1,0.35)' }, '<')
+        .call(() => { spot = g; if (line) say(line, 2400 + hold * 600); });
+      if (point) tl.add(pointTl(point, { lean: g.lean, hold }), '+=0.1');
+      else tl.call(() => host.classList.add('waving')).to({}, { duration: hold + 1 }).call(() => host.classList.remove('waving'));
+      tl.to({}, { duration: 0.4 });
+      retreat(tl, g);
+    }
+
+    // a peek at something in the current section, in whichever side margin has room
+    function idlePeek() {
+      idleT = 0;
+      if (!sec || tl) return;
+      const sides = Math.random() < 0.5 ? ['right', 'left'] : ['left', 'right'];
+      const firstTime = enterPending;
+      const pool = firstTime && sec.title ? [document.querySelector(sec.title)] : [...document.querySelectorAll(sec.targets)];
+      const els = pool.filter((el) => el && inView(el.getBoundingClientRect()));
+      for (const s of sides) {
+        // try the things nearest that side first, rotating so she doesn't always pick the same one
+        const near = els.map((el) => { const r = el.getBoundingClientRect(); return { el, d: s === 'left' ? r.left : innerWidth - r.right }; })
+          .sort((a, b) => a.d - b.d).slice(0, 3);
+        for (let k = 0; k < near.length; k++) {
+          const el = near[(n + k) % near.length].el;
+          const g = sideGeom(el, s);
+          if (!g) continue;
+          n += 1; enterPending = false;
+          show(g, { line: firstTime ? sec.enter : pick(sec.lines), point: el, after: () => { idleT = setTimeout(idlePeek, rand(5500, 8500)); } });
+          return;
+        }
+      }
+      if (firstTime) { // no room at the sides: say it from behind the pill instead
+        enterPending = false;
+        const g = perchGeom();
+        if (g) show(g, { line: sec.enter, point: perch, hold: 1.2 });
+      }
+    }
+
+    const onScroll = () => {
+      if (active && active.edge === 'side') { tl && tl.kill(); tl = null; retreat(); }
+      clearTimeout(idleT);
+      idleT = setTimeout(idlePeek, 1100);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    gsap.set(btn, { x: -btn.offsetWidth - 16, y: innerHeight / 2 });
+
+    return {
+      onSection(id) {
+        if (!sections[id] || sec === sections[id]) return;
+        sec = sections[id]; n = 0; enterPending = true;
+        if (!tl) { clearTimeout(idleT); idleT = setTimeout(idlePeek, 900); }
+      },
+    };
+  }
+
+  return { say, hop, pointAt, roam, peekScreen };
 }

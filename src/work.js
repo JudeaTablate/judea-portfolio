@@ -29,8 +29,24 @@ pill.addEventListener('click', (e) => {
 sheet.addEventListener('click', () => { sheet.classList.remove('open'); pill.setAttribute('aria-expanded', 'false'); });
 document.addEventListener('click', (e) => { if (!sheet.contains(e.target) && e.target !== pill) { sheet.classList.remove('open'); pill.setAttribute('aria-expanded', 'false'); } });
 
-const railBuddy = mountBuddy(document.getElementById('railBuddy'), {
+// mini Ja peeks in from the edge of the screen and points at things in the section you're reading
+const buddyHost = document.createElement('div');
+buddyHost.className = 'page-buddy';
+document.body.appendChild(buddyHost);
+const pageBuddy = mountBuddy(buddyHost, {
   lines: ['keep scrolling, it gets better', 'i helped with the docs', 'the wins section is my fave', 'hire her (me)', 'psst: try the >_ button up top'],
+});
+const peeker = pageBuddy.peekScreen({
+  perch: pill,
+  avoid: 'main h1, main h2, main h3, main h4, main p, main a, main button, main img, .ch-num, .cert-card, .tech-tile, .win-card, .win-spot, .exp-row, .proj-visual, .bframe, .term, .chip, .next-door, #siteHeader, .rail, .where-pill, .where-sheet',
+  sections: {
+    work: { title: '#work .ch-title', enter: 'my projects! scroll to flip through', targets: '.proj.active h3', lines: ['i built this one', 'keep scrolling for the next one', 'tap a name up top to jump'] },
+    wins: { title: '#wins .ch-title', enter: 'the proud section', targets: '#wins .ws-num, #wins .win-card h3', lines: ['look look', 'this one!', 'still proud of this'] },
+    experience: { title: '#experience .ch-title', enter: 'where i’ve worked + led', targets: '#experience .exp-org', lines: ['busy, busy', 'this one', 'learned a lot here'] },
+    skills: { title: '#skills .ch-title', enter: 'my toolbox', targets: '#skills .tech-grid:not([hidden]) .tech-tile', lines: ['try the other tabs', 'ooh, this one', 'pick a category up there'] },
+    certificates: { title: '#certificates .ch-title', enter: 'proof i did the homework', targets: '#certificates .cert-card h4', lines: ['each one links to its credential', 'filter them up top', 'this one'] },
+    contact: { title: '#contact h2', enter: 'say hi!', targets: '#contact .js-email-btn', lines: ['an email is the quickest way', 'go on, say hi'] },
+  },
 });
 
 let current = null;
@@ -42,10 +58,7 @@ function setActive(c) {
   wpNum.textContent = c.n; wpName.textContent = c.name;
   document.querySelectorAll('.crumb-live').forEach((el) => { el.textContent = c.name; });
   pill.classList.add('pulse'); setTimeout(() => pill.classList.remove('pulse'), 500);
-  if (!first && railBuddy) {
-    railBuddy.hop(); railBuddy.say(`now: ${c.name.toLowerCase()}`, 1600);
-    railBuddy.pointAt(railList.querySelector(`a[data-id="${c.id}"] .lcd`), { hold: 0.9 }); // points up at the chapter you're in
-  }
+  peeker.onSection(c.id);
 }
 chapters.forEach((c) => {
   ScrollTrigger.create({ trigger: c.el, start: 'top 45%', end: 'bottom 45%', onToggle: (s) => s.isActive && setActive(c) });
