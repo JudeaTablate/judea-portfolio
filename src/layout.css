@@ -185,6 +185,14 @@ section.chapter.pad{padding:clamp(64px,10vh,110px) 28px;}
 .buddy.screen .buddy-bubble{bottom:auto; left:0; top:0;}
 .buddy.screen .buddy-hop svg{filter:drop-shadow(0 6px 10px rgba(40,10,30,.22));}
 @media (max-width:860px){ .buddy.screen{--bsize:96px;} }
+/* her tap menu: same look as the speech bubble, but clickable */
+.buddy-menu{position:absolute; left:0; top:0; z-index:6; display:flex; flex-direction:column; gap:2px; min-width:200px; padding:10px 8px 8px; border-radius:16px 16px 16px 4px; background:var(--text); color:var(--bg); box-shadow:0 14px 30px rgba(0,0,0,.3); opacity:0; transform:translateY(6px) scale(.94); transform-origin:0 100%; pointer-events:none; transition:opacity .18s, transform .25s var(--ease);}
+.buddy-menu[data-tail="r"]{border-radius:16px 16px 4px 16px; transform-origin:100% 100%;}
+.buddy.menu-open .buddy-menu{opacity:1; transform:none; pointer-events:auto;}
+.buddy-menu b{padding:0 10px 6px; font:600 12.5px/1.2 'Bricolage Grotesque',sans-serif; opacity:.65;}
+.buddy-menu button{display:block; width:100%; padding:9px 10px; border:0; border-radius:10px; background:none; color:inherit; text-align:left; font:600 14.5px/1.25 'Bricolage Grotesque',sans-serif; cursor:pointer; transition:background .15s;}
+.buddy-menu button:hover, .buddy-menu button:focus-visible{background:color-mix(in srgb,var(--bg) 14%,transparent); outline:none;}
+.buddy-menu button:focus-visible{box-shadow:inset 0 0 0 2px var(--accent2);}
 @media (min-width:1500px){ .rail{display:block;} }
 @media (min-width:1500px){ .in-chapters .rail{opacity:1;} .rail{opacity:0; transition:opacity .4s;} }
 
