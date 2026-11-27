@@ -268,7 +268,8 @@ export function mountBuddy(host, { lines = [], size } = {}) {
   // door frame: her feet stay out of sight and she pivots on them, so her head tilts into view
   // with her whole face showing. She sneaks a look first, flinches, then pops out, looks at
   // something in the section you're reading and points at it (sometimes she plays peekaboo).
-  // She comes out once scrolling settles and ducks away if you scroll on.
+  // She comes out once scrolling settles, stays out between actions, and ducks away only
+  // while you scroll on.
   const LEAN = 30; // how far she tilts around the edge, in degrees
   const OFF = 56;  // her pivot sits this far past the edge (viewBox units): fully hidden when upright
   function peekScreen({ sections, avoid = '', top = 68 }) {
@@ -324,27 +325,40 @@ export function mountBuddy(host, { lines = [], size } = {}) {
         .call(() => { active = null; });
     }
 
-    function show(g, { line, hold = 1.4, after, peekaboo } = {}) {
+    // Once she's out she stays parked at the edge between actions. If the next thing to point at
+    // is reachable from where she already is, she just turns to it; otherwise she ducks out and
+    // peeks in again at the new spot. `leave` = go back into hiding afterwards (thin margins).
+    function show(g, { line, hold = 1.4, after, peekaboo, leave } = {}) {
       tl && tl.kill();
       tl = gsap.timeline({ onComplete: () => { tl = null; after && after(); } });
-      retreat(tl);
       const L = g.lean;
-      tl.call(() => { active = g; startY = scrollY; facing = g.face; gsap.set(face, { scaleX: g.face }); })
-        .set(btn, { x: g.hid.x, y: g.hid.y })
-        .set(pose, { rotation: 0, scaleX: 1, scaleY: 1 })
-        .set(host, { '--arm': '0deg', '--armb': '0deg', '--head': '0deg' })
-        // sneak: creep up to the edge and lean out just enough for one eye
-        .to(btn, { x: g.vis.x, duration: 0.3, ease: 'power1.out' })
-        .to(pose, { rotation: L * 0.42, duration: 0.6, ease: 'power2.out' }, '<0.1')
-        .to(host, { '--head': '-9deg', duration: 0.4, ease: 'power2.out' }, '<')
-        .call(() => lookAt(g.target, 2600))
-        .to({}, { duration: 0.55 })
-        // flinch back... then pop out all the way, with a springy wobble
-        .to(pose, { rotation: L * 0.22, duration: 0.14, ease: 'power2.in' })
-        .to(pose, { rotation: L, duration: 0.95, ease: 'elastic.out(1,0.42)' })
-        .fromTo(face, { scaleY: 0.9 }, { scaleY: 1, duration: 0.7, ease: 'elastic.out(1,0.35)' }, '<')
-        .to(host, { '--head': '4deg', duration: 0.35, ease: 'back.out(2)' }, '<')
-        .call(() => { spot = g; if (line) say(line, 2600 + hold * 700); });
+      const stay = active && active.side === g.side && Math.abs(active.pivot.y - g.pivot.y) < 70;
+      if (stay) {
+        g = { ...active, target: g.target, cover: g.cover };
+        tl.call(() => { active = g; spot = g; lookAt(g.target, 2600); if (line) say(line, 2600 + hold * 700); })
+          .to(pose, { rotation: L, scaleX: 1, scaleY: 1, duration: 0.25 }) // in case she was interrupted mid-move
+          .to(host, { '--head': '-8deg', duration: 0.25, ease: 'power2.out' }, '<')
+          .to(host, { '--head': '3deg', duration: 0.3, ease: 'back.out(2)' });
+      } else {
+        retreat(tl);
+        tl.call(() => { active = g; facing = g.face; gsap.set(face, { scaleX: g.face }); })
+          .set(btn, { x: g.hid.x, y: g.hid.y })
+          .set(pose, { rotation: 0, scaleX: 1, scaleY: 1 })
+          .set(host, { '--arm': '0deg', '--armb': '0deg', '--head': '0deg' })
+          // sneak: creep up to the edge and lean out just enough for one eye
+          .to(btn, { x: g.vis.x, duration: 0.3, ease: 'power1.out' })
+          .to(pose, { rotation: L * 0.42, duration: 0.6, ease: 'power2.out' }, '<0.1')
+          .to(host, { '--head': '-9deg', duration: 0.4, ease: 'power2.out' }, '<')
+          .call(() => lookAt(g.target, 2600))
+          .to({}, { duration: 0.55 })
+          // flinch back... then pop out all the way, with a springy wobble
+          .to(pose, { rotation: L * 0.22, duration: 0.14, ease: 'power2.in' })
+          .to(pose, { rotation: L, duration: 0.95, ease: 'elastic.out(1,0.42)' })
+          .fromTo(face, { scaleY: 0.9 }, { scaleY: 1, duration: 0.7, ease: 'elastic.out(1,0.35)' }, '<')
+          .to(host, { '--head': '4deg', duration: 0.35, ease: 'back.out(2)' }, '<')
+          .call(() => { spot = g; if (line) say(line, 2600 + hold * 700); });
+      }
+      tl.call(() => { startY = scrollY; });
       tl.add(pointTl(g.target, { lean: L, hold }), '+=0.05');
       if (peekaboo) { // duck out of sight, then burst back in waving
         tl.call(hush)
@@ -358,8 +372,8 @@ export function mountBuddy(host, { lines = [], size } = {}) {
       } else {
         tl.to(host, { '--head': '-6deg', duration: 0.35, yoyo: true, repeat: 1, ease: 'sine.inOut' }); // little head bob
       }
-      tl.to({}, { duration: 0.5 });
-      retreat(tl, g);
+      tl.to(host, { '--head': '0deg', duration: 0.3 });
+      if (leave) { tl.to({}, { duration: 0.5 }); retreat(tl, g); }
     }
 
     // peek at something in the current section from whichever edge covers the least
@@ -376,11 +390,13 @@ export function mountBuddy(host, { lines = [], size } = {}) {
       // the edge where she'd cover the least (a coin flip when both are clear)
       const g = ['left', 'right'].map((s) => geom(el, s, blockers)).sort((a, b) => (a.cover - b.cover) || (Math.random() - 0.5))[0];
       n += 1; enterPending = false;
+      // where the margins are thin she'd overlap the page, so there she pops back in after each peek
+      const thin = g.cover > 0.15;
       show(g, {
         line: firstTime ? sec.enter : pick(sec.lines),
-        peekaboo: !firstTime && Math.random() < 0.35,
-        // when the margins are thin she has to overlap the page a bit, so she comes out less often
-        after: () => { idleT = setTimeout(idlePeek, g.cover > 0.15 ? rand(8000, 11000) : rand(4000, 6500)); },
+        peekaboo: !firstTime && Math.random() < 0.3,
+        leave: thin,
+        after: () => { idleT = setTimeout(idlePeek, thin ? rand(5000, 7000) : rand(4500, 7000)); },
       });
     }
 
