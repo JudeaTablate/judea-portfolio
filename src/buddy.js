@@ -44,7 +44,11 @@ export function mountBuddy(host, { lines = [], size } = {}) {
     clearTimeout(hopT);
     hopT = setTimeout(() => host.classList.remove('hopping'), 650);
   };
-  btn.addEventListener('click', () => { hop(); if (lines.length) { say(lines[li % lines.length]); li++; } });
+  let onTap = null; // a mode can take over what a click does (peekScreen opens her menu)
+  btn.addEventListener('click', (e) => {
+    if (onTap) return onTap(e);
+    hop(); if (lines.length) { say(lines[li % lines.length]); li++; }
+  });
   btn.addEventListener('mouseenter', () => host.classList.add('waving'));
   btn.addEventListener('mouseleave', () => host.classList.remove('waving'));
 
@@ -272,13 +276,14 @@ export function mountBuddy(host, { lines = [], size } = {}) {
   // while you scroll on.
   const LEAN = 30; // how far she tilts around the edge, in degrees
   const OFF = 56;  // her pivot sits this far past the edge (viewBox units): fully hidden when upright
-  function peekScreen({ sections, avoid = '', top = 68 }) {
+  // `menu(sectionId)` returns the shortcuts she offers when clicked: [{ label, say, run }]
+  function peekScreen({ sections, avoid = '', top = 68, menu }) {
     if (reduce) return { onSection() {} };
     host.classList.add('screen');
     const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
     const inView = (r) => r.width > 0 && r.top >= top + 10 && r.bottom <= innerHeight - 40;
     const overlap = (a, b) => Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left)) * Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
-    let tl = null, idleT = 0, sec = null, n = 0, enterPending = false, active = null, startY = 0, held = false;
+    let tl = null, idleT = 0, sec = null, secId = null, n = 0, enterPending = false, active = null, startY = 0, held = false, menuOpen = false;
 
     // a point of the avatar (viewBox coords) -> screen offset from her pivot, for a given tilt/facing
     function rot(px, py, deg, f, s) {
@@ -299,7 +304,7 @@ export function mountBuddy(host, { lines = [], size } = {}) {
       const area = (box.right - box.left) * (box.bottom - box.top);
       const cover = blockers.reduce((sum, r) => sum + overlap(box, r), 0) / area;
       return {
-        side, face: f, lean, cover, target,
+        side, face: f, lean, cover, target, reach,
         pivot: { x: px, y: py },
         vis: { x: px - w / 2, y: py - h }, hid: { x: px - w / 2 + (left ? -w * 0.15 : w * 0.15), y: py - h },
         crown: { x: px + crown.x, y: py + crown.y },
@@ -379,7 +384,7 @@ export function mountBuddy(host, { lines = [], size } = {}) {
     // peek at something in the current section from whichever edge covers the least
     function idlePeek() {
       idleT = 0;
-      if (!sec || tl || held) return;
+      if (!sec || tl || held || menuOpen) return;
       const firstTime = enterPending;
       const visibleOf = (sel) => (sel ? [...document.querySelectorAll(sel)] : []).filter((el) => inView(el.getBoundingClientRect()));
       // just entered a section: point at its title if it's on screen, otherwise at anything in it
@@ -402,7 +407,7 @@ export function mountBuddy(host, { lines = [], size } = {}) {
 
     const onScroll = () => {
       // small nudges are fine; a real scroll and she ducks away
-      if (active && Math.abs(scrollY - startY) > 140) { tl && tl.kill(); tl = null; retreat(); }
+      if (active && Math.abs(scrollY - startY) > 140) { closeMenu(); tl && tl.kill(); tl = null; retreat(); }
       clearTimeout(idleT);
       idleT = setTimeout(idlePeek, 1000);
     };
@@ -411,16 +416,67 @@ export function mountBuddy(host, { lines = [], size } = {}) {
 
     // hovering her holds her still (mid-move too) so she's easy to click
     btn.addEventListener('pointerenter', () => { held = true; tl && tl.pause(); clearTimeout(idleT); });
-    btn.addEventListener('pointerleave', () => {
-      held = false;
-      if (tl) tl.resume(); else { clearTimeout(idleT); idleT = setTimeout(idlePeek, 2500); }
+    btn.addEventListener('pointerleave', () => { held = false; if (!menuOpen) carryOn(); });
+    function carryOn() { if (tl) tl.resume(); else { clearTimeout(idleT); idleT = setTimeout(idlePeek, 2500); } }
+
+    /* tap menu: click her and she offers a few shortcuts */
+    const menuEl = document.createElement('div');
+    menuEl.className = 'buddy-menu';
+    menuEl.setAttribute('role', 'menu');
+    menuEl.setAttribute('aria-label', 'Mini Judea’s shortcuts');
+    host.appendChild(menuEl);
+    btn.setAttribute('aria-haspopup', 'menu');
+    btn.setAttribute('aria-expanded', 'false');
+
+    function placeMenu() {
+      const g = active, mw = menuEl.offsetWidth, mh = menuEl.offsetHeight, left = g.side === 'left';
+      let x = left ? g.crown.x - 6 : g.crown.x - mw + 6, y = g.crown.y - mh - 10;
+      if (y < top + 4) { y = Math.max(top + 4, g.crown.y); x = left ? g.reach + 10 : innerWidth - g.reach - mw - 10; } // no room above: beside her head
+      menuEl.style.left = `${clamp(x, 8, innerWidth - 8 - mw)}px`;
+      menuEl.style.top = `${clamp(y, top + 4, innerHeight - 8 - mh)}px`;
+      menuEl.dataset.tail = left ? 'l' : 'r';
+    }
+    function openMenu(e) {
+      const items = menu ? menu(secId) : [];
+      if (!items.length || !active) return;
+      menuOpen = true;
+      tl && tl.pause(); clearTimeout(idleT); hush(); hop();
+      menuEl.innerHTML = '<b>hi! need a hand?</b>';
+      items.forEach((it) => {
+        const b = document.createElement('button');
+        b.type = 'button'; b.setAttribute('role', 'menuitem'); b.textContent = it.label;
+        b.addEventListener('click', () => { closeMenu(); if (it.say) say(it.say, 1800); it.run(); });
+        menuEl.appendChild(b);
+      });
+      placeMenu();
+      host.classList.add('menu-open');
+      btn.setAttribute('aria-expanded', 'true');
+      if (e && e.detail === 0) menuEl.querySelector('button').focus(); // opened from the keyboard
+    }
+    function closeMenu(refocus) {
+      if (!menuOpen) return;
+      menuOpen = false;
+      host.classList.remove('menu-open');
+      btn.setAttribute('aria-expanded', 'false');
+      if (refocus) btn.focus();
+      if (!held) carryOn();
+    }
+    if (menu) onTap = (e) => (menuOpen ? closeMenu() : openMenu(e));
+    document.addEventListener('pointerdown', (e) => { if (menuOpen && !menuEl.contains(e.target) && !btn.contains(e.target)) closeMenu(); });
+    document.addEventListener('keydown', (e) => {
+      if (!menuOpen) return;
+      if (e.key === 'Escape') closeMenu(true);
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { // move between the shortcuts
+        const bs = [...menuEl.querySelectorAll('button')], i = bs.indexOf(document.activeElement);
+        bs[(i + (e.key === 'ArrowDown' ? 1 : -1) + bs.length) % bs.length].focus(); e.preventDefault();
+      }
     });
     gsap.set(btn, { x: -btn.offsetWidth * 2, y: innerHeight / 2 });
 
     return {
       onSection(id) {
         if (!sections[id] || sec === sections[id]) return;
-        sec = sections[id]; n = 0; enterPending = true;
+        sec = sections[id]; secId = id; n = 0; enterPending = true;
         if (!tl) { clearTimeout(idleT); idleT = setTimeout(idlePeek, 900); }
       },
     };

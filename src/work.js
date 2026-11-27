@@ -37,6 +37,17 @@ const pageBuddy = mountBuddy(buddyHost, {
   lines: ['keep scrolling, it gets better', 'i helped with the docs', 'the wins section is my fave', 'hire her (me)', 'psst: try the >_ button up top'],
 });
 const peeker = pageBuddy.peekScreen({
+  // click her for shortcuts: the next chapter (or back up top), email, the terminal
+  menu: (id) => {
+    const next = chapters[id === 'intro' ? 0 : chapters.findIndex((c) => c.id === id) + 1];
+    return [
+      next
+        ? { label: `Take me to ${next.name} ↓`, say: 'this way!', run: () => lenis.scrollTo(next.el, { offset: -70, duration: 1.1 }) }
+        : { label: 'Back to the top ↑', say: 'wheee!', run: () => lenis.scrollTo(0, { duration: 1.4 }) },
+      { label: 'Email Judea ✉', say: 'she’ll love that', run: () => document.querySelector('.js-email-btn')?.click() },
+      { label: 'Open the terminal >_', say: 'type help!', run: () => document.getElementById('termBtn')?.click() },
+    ];
+  },
   avoid: 'main h1, main h2, main h3, main h4, main p, main a, main button, main img, .ch-num, .cert-card, .tech-tile, .win-card, .win-spot, .exp-row, .proj-visual, .bframe, .term, .chip, .next-door, #siteHeader, .rail, .where-pill, .where-sheet',
   sections: {
     intro: { title: '.page-title', enter: 'hi! this is all her work', targets: '#toc a', lines: ['tap a chapter to jump', 'projects first, obviously', 'or just scroll, i’ll tag along', 'six chapters, all good ones'] },
