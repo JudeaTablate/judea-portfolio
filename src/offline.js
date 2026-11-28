@@ -4,6 +4,11 @@ import { initTerminal } from './terminal.js';
 
 const $ = (id) => document.getElementById(id);
 const esc = (s = '') => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+// Turn entities like &#8220; back into characters before esc() runs, so they
+// aren't double-escaped into visible codes. A <textarea> parses entities but
+// never runs markup, so this is safe on feed text.
+const entityBox = document.createElement('textarea');
+const unent = (s = '') => { entityBox.innerHTML = String(s); return entityBox.value; };
 const lb = `https://letterboxd.com/${MEDIA.letterboxdUser}/`;
 const ss = `https://${MEDIA.substack}.substack.com/`;
 
@@ -58,8 +63,8 @@ function renderWords(d) {
     ? posts.slice(0, 3).map((p, i) => `<a class="letter" href="${esc(p.url)}" target="_blank" rel="noopener" style="--r:${[-1.5, 1, -0.5][i]}deg">
         <span class="letter-stamp lcd">No. ${String((count || posts.length) - i).padStart(2, '0')}</span>
         <span class="letter-date">${fmtDate(p.date)}</span>
-        <b class="letter-title">${esc(p.title)}</b>
-        ${p.subtitle ? `<span class="letter-sub">${esc(p.subtitle)}</span>` : ''}
+        <b class="letter-title">${esc(unent(p.title))}</b>
+        ${p.subtitle ? `<span class="letter-sub">${esc(unent(p.subtitle))}</span>` : ''}
         <span class="letter-foot">${p.minutes ? `${p.minutes} min read` : 'read'} &rarr;</span>
       </a>`).join('')
     : `<a class="letter" href="${ss}" target="_blank" rel="noopener"><span class="letter-date">Substack</span><b class="letter-title">Essays live here</b><span class="letter-foot">read &rarr;</span></a>`;
