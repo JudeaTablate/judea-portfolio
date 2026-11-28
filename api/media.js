@@ -14,7 +14,18 @@ const get = async (url, type = 'text') => {
     return type === 'json' ? r.json() : r.text();
   } finally { clearTimeout(t); }
 };
-const decode = (s = '') => s.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1').replace(/&amp;/g, '&').replace(/&#0?39;|&apos;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').trim();
+const NAMED = {
+  amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ',
+  lsquo: '‘', rsquo: '’', ldquo: '“', rdquo: '”', ndash: '–', mdash: '—', hellip: '…',
+};
+// fromCodePoint throws on values past U+10FFFF; keep a malformed entity as-is
+// rather than failing the whole feed.
+const char = (cp, raw) => (cp > 0 && cp <= 0x10ffff ? String.fromCodePoint(cp) : raw);
+const decode = (s = '') => s
+  .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
+  .replace(/&(?:#(\d+)|#x([\da-f]+)|([a-z]+));/gi, (m, dec, hex, name) =>
+    dec ? char(+dec, m) : hex ? char(parseInt(hex, 16), m) : NAMED[name.toLowerCase()] ?? m)
+  .trim();
 const tag = (xml, name) => { const m = xml.match(new RegExp(`<${name}[^>]*>([\\s\\S]*?)</${name}>`)); return m ? decode(m[1]) : null; };
 
 async function letterboxd() {
@@ -84,7 +95,8 @@ async function substack() {
     return {
       count: posts.length,
       posts: posts.slice(0, 6).map((p) => ({
-        title: p.title, subtitle: p.subtitle || p.description || '', date: p.post_date,
+        // the archive API returns subtitles with HTML entities still encoded (&#8220; etc.)
+        title: decode(p.title), subtitle: decode(p.subtitle || p.description || ''), date: p.post_date,
         url: p.canonical_url, cover: p.cover_image || null, minutes: p.wordcount ? Math.max(1, Math.round(p.wordcount / 230)) : null,
       })),
     };
