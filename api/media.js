@@ -14,7 +14,10 @@ const get = async (url, type = 'text') => {
     return type === 'json' ? r.json() : r.text();
   } finally { clearTimeout(t); }
 };
-const NAMED = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'" };
+const NAMED = {
+  amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ',
+  lsquo: '‘', rsquo: '’', ldquo: '“', rdquo: '”', ndash: '–', mdash: '—', hellip: '…',
+};
 const decode = (s = '') => s
   .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
   .replace(/&(?:#(\d+)|#x([\da-f]+)|([a-z]+));/gi, (m, dec, hex, name) =>
