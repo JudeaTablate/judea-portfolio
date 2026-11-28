@@ -18,10 +18,13 @@ const NAMED = {
   amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ',
   lsquo: '‘', rsquo: '’', ldquo: '“', rdquo: '”', ndash: '–', mdash: '—', hellip: '…',
 };
+// fromCodePoint throws on values past U+10FFFF; keep a malformed entity as-is
+// rather than failing the whole feed.
+const char = (cp, raw) => (cp > 0 && cp <= 0x10ffff ? String.fromCodePoint(cp) : raw);
 const decode = (s = '') => s
   .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
   .replace(/&(?:#(\d+)|#x([\da-f]+)|([a-z]+));/gi, (m, dec, hex, name) =>
-    dec ? String.fromCodePoint(+dec) : hex ? String.fromCodePoint(parseInt(hex, 16)) : NAMED[name.toLowerCase()] ?? m)
+    dec ? char(+dec, m) : hex ? char(parseInt(hex, 16), m) : NAMED[name.toLowerCase()] ?? m)
   .trim();
 const tag = (xml, name) => { const m = xml.match(new RegExp(`<${name}[^>]*>([\\s\\S]*?)</${name}>`)); return m ? decode(m[1]) : null; };
 
