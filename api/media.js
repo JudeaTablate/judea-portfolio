@@ -95,7 +95,8 @@ async function substack() {
     return {
       count: posts.length,
       posts: posts.slice(0, 6).map((p) => ({
-        title: p.title, subtitle: p.subtitle || p.description || '', date: p.post_date,
+        // the archive API returns subtitles with HTML entities still encoded (&#8220; etc.)
+        title: decode(p.title), subtitle: decode(p.subtitle || p.description || ''), date: p.post_date,
         url: p.canonical_url, cover: p.cover_image || null, minutes: p.wordcount ? Math.max(1, Math.round(p.wordcount / 230)) : null,
       })),
     };
